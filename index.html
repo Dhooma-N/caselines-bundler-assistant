@@ -7,6 +7,23 @@
   <title>CourtLine Bundler</title>
 
   <style>
+   .process-button {
+  margin-top: 30px;
+  padding: 16px 32px;
+  background: #2f3720;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: "Century Gothic", CenturyGothic, sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.process-button:disabled {
+  background: #666269;
+  cursor: not-allowed;
+  opacity: 0.6;
+} 
     body {
       margin: 0;
       font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
@@ -130,7 +147,11 @@
     </div>
 
     <div id="file-list"></div>
+<button id="process-button" class="process-button" disabled>
+  Process Documents
+</button>
 
+<p id="file-count"></p>
     <p class="privacy">
       No login required • Your documents are not permanently retained
     </p>
@@ -145,33 +166,55 @@
 
   </main>
 
-  <script>
+ <script>
 
-    const fileUpload = document.getElementById("file-upload");
-    const fileList = document.getElementById("file-list");
+  const fileUpload = document.getElementById("file-upload");
+  const fileList = document.getElementById("file-list");
+  const processButton = document.getElementById("process-button");
+  const fileCount = document.getElementById("file-count");
 
-    fileUpload.addEventListener("change", function () {
+  fileUpload.addEventListener("change", function () {
 
-      fileList.innerHTML = "";
+    fileList.innerHTML = "";
 
-      const files = fileUpload.files;
+    const files = fileUpload.files;
 
-      for (let i = 0; i < files.length; i++) {
+    if (files.length > 0) {
+      processButton.disabled = false;
 
-        const file = document.createElement("div");
+      fileCount.textContent =
+        files.length + " document(s) ready to process";
+    } else {
+      processButton.disabled = true;
+      fileCount.textContent = "";
+    }
 
-        file.className = "file";
+    for (let i = 0; i < files.length; i++) {
 
-        file.textContent =
-          "📄 " + files[i].name;
+      const file = document.createElement("div");
 
-        fileList.appendChild(file);
+      file.className = "file";
 
-      }
+      file.textContent =
+        "📄 " + files[i].name;
 
-    });
+      fileList.appendChild(file);
 
-  </script>
+    }
 
+  });
+
+  processButton.addEventListener("click", function () {
+
+    processButton.textContent = "Processing Documents...";
+
+    processButton.disabled = true;
+
+    fileCount.textContent =
+      "The document processing system will be connected in the next step.";
+
+  });
+
+</script>
 </body>
 </html>
