@@ -107,6 +107,33 @@
       font-size: 40px;
       font-weight: bold;
     }
+    .results {
+  margin-top: 40px;
+  text-align: left;
+}
+
+.results h2 {
+  text-align: center;
+}
+
+.result-item {
+  padding: 18px;
+  margin-top: 10px;
+  border: 1px solid #d8d5d0;
+  border-radius: 8px;
+  background: white;
+}
+
+.result-name {
+  font-weight: bold;
+  color: #2f3720;
+}
+
+.result-status {
+  margin-top: 6px;
+  color: #666269;
+  font-size: 14px;
+}
   </style>
 </head>
 
@@ -152,6 +179,7 @@
 </button>
 
 <p id="file-count"></p>
+    <div id="results"></div>
     <p class="privacy">
       No login required • Your documents are not permanently retained
     </p>
@@ -204,16 +232,73 @@
 
   });
 
-  processButton.addEventListener("click", function () {
+const results = document.getElementById("results");
 
-    processButton.textContent = "Processing Documents...";
+processButton.addEventListener("click", function () {
 
-    processButton.disabled = true;
+  const files = fileUpload.files;
 
-    fileCount.textContent =
-      "The document processing system will be connected in the next step.";
+  processButton.textContent = "Processing Documents...";
+  processButton.disabled = true;
 
-  });
+  results.innerHTML = "<h2>Processing Results</h2>";
+
+  for (let i = 0; i < files.length; i++) {
+
+    const originalName = files[i].name;
+
+    // Temporary identification system.
+    // This will later be replaced with PDF first-page reading.
+    let identifiedAs = "Review Required";
+
+    const name = originalName.toLowerCase();
+
+    if (name.includes("summons")) {
+      identifiedAs = "Summons";
+    }
+    else if (name.includes("founding")) {
+      identifiedAs = "Founding Affidavit";
+    }
+    else if (name.includes("answering")) {
+      identifiedAs = "Answering Affidavit";
+    }
+    else if (name.includes("replying")) {
+      identifiedAs = "Replying Affidavit";
+    }
+    else if (name.includes("notice")) {
+      identifiedAs = "Notice";
+    }
+    else if (name.includes("heads")) {
+      identifiedAs = "Heads of Argument";
+    }
+    else if (name.includes("plea")) {
+      identifiedAs = "Plea";
+    }
+
+    const item = document.createElement("div");
+
+    item.className = "result-item";
+
+    item.innerHTML = `
+      <div class="result-name">
+        ${originalName}
+      </div>
+
+      <div class="result-status">
+        Identified as: <strong>${identifiedAs}</strong>
+      </div>
+    `;
+
+    results.appendChild(item);
+
+  }
+
+  processButton.textContent = "Documents Processed";
+
+  fileCount.textContent =
+    files.length + " document(s) processed. Please review the results.";
+
+});
 
 </script>
 </body>
