@@ -195,6 +195,7 @@
   </main>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
  <script>
 
   const fileUpload = document.getElementById("file-upload");
@@ -264,6 +265,50 @@ async function readFirstPage(file) {
   }
 
 }
+async function readFirstPageWithOCR(file) {
+
+  try {
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    const pdf = await pdfjsLib.getDocument({
+      data: arrayBuffer
+    }).promise;
+
+    const page = await pdf.getPage(1);
+
+    const viewport = page.getViewport({
+      scale: 2
+    });
+
+    const canvas = document.createElement("canvas");
+
+    const context = canvas.getContext("2d");
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+
+    const result = await Tesseract.recognize(
+      canvas,
+      "eng"
+    );
+
+    return result.data.text;
+
+  } catch (error) {
+
+    console.error("OCR Error:", error);
+
+    return "";
+
+  }
+
+}
 processButton.addEventListener("click", async function () {
 
   const files = fileUpload.files;
@@ -277,7 +322,13 @@ for (let i = 0; i < files.length; i++) {
 
   const originalName = files[i].name;
 
-  const firstPageText = await readFirstPage(files[i]);
+let firstPageText = await readFirstPage(files[i]);
+
+if (!firstPageText || firstPageText.trim().length < 10) {
+
+  firstPageText = await readFirstPageWithOCR(files[i]);
+
+}
 
   let identifiedAs = "Review Required";
 
@@ -317,9 +368,20 @@ for (let i = 0; i < files.length; i++) {
       ${originalName}
     </div>
 
-    <div class="result-status">
-      Identified as: <strong>${identifiedAs}</strong>
-    </div>
+<div class="result-status">
+
+  Identified as:
+  <strong>${identifiedAs}</strong>
+
+  <br><br>
+
+  <strong>First page text detected:</strong>
+
+  <br>
+
+  ${firstPageText.substring(0, 500)}
+
+</div>
   `;
 
   results.appendChild(item);
