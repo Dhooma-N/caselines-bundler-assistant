@@ -194,6 +194,7 @@
 
   </main>
 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
  <script>
 
   const fileUpload = document.getElementById("file-upload");
@@ -234,7 +235,36 @@
 
 const results = document.getElementById("results");
 
-processButton.addEventListener("click", function () {
+async function readFirstPage(file) {
+
+  try {
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    const pdf = await pdfjsLib.getDocument({
+      data: arrayBuffer
+    }).promise;
+
+    const page = await pdf.getPage(1);
+
+    const textContent = await page.getTextContent();
+
+    const text = textContent.items
+      .map(item => item.str)
+      .join(" ");
+
+    return text;
+
+  } catch (error) {
+
+    console.error("Error reading PDF:", error);
+
+    return "";
+
+  }
+
+}
+processButton.addEventListener("click", async function () {
 
   const files = fileUpload.files;
 
@@ -243,53 +273,58 @@ processButton.addEventListener("click", function () {
 
   results.innerHTML = "<h2>Processing Results</h2>";
 
-  for (let i = 0; i < files.length; i++) {
+for (let i = 0; i < files.length; i++) {
 
-    const originalName = files[i].name;
+  const originalName = files[i].name;
 
-    // Temporary identification system.
-    // This will later be replaced with PDF first-page reading.
-    let identifiedAs = "Review Required";
+  const firstPageText = await readFirstPage(files[i]);
 
-    const name = originalName.toLowerCase();
+  let identifiedAs = "Review Required";
 
-    if (name.includes("summons")) {
-      identifiedAs = "Summons";
-    }
-    else if (name.includes("founding")) {
-      identifiedAs = "Founding Affidavit";
-    }
-    else if (name.includes("answering")) {
-      identifiedAs = "Answering Affidavit";
-    }
-    else if (name.includes("replying")) {
-      identifiedAs = "Replying Affidavit";
-    }
-    else if (name.includes("notice")) {
-      identifiedAs = "Notice";
-    }
-    else if (name.includes("heads")) {
-      identifiedAs = "Heads of Argument";
-    }
-    else if (name.includes("plea")) {
-      identifiedAs = "Plea";
-    }
+  const text = firstPageText.toLowerCase();
 
-    const item = document.createElement("div");
+  if (text.includes("combined summons")) {
+    identifiedAs = "Combined Summons";
+  }
+  else if (text.includes("founding affidavit")) {
+    identifiedAs = "Founding Affidavit";
+  }
+  else if (text.includes("answering affidavit")) {
+    identifiedAs = "Answering Affidavit";
+  }
+  else if (text.includes("replying affidavit")) {
+    identifiedAs = "Replying Affidavit";
+  }
+  else if (text.includes("notice of motion")) {
+    identifiedAs = "Notice of Motion";
+  }
+  else if (text.includes("heads of argument")) {
+    identifiedAs = "Heads of Argument";
+  }
+  else if (text.includes("particulars of claim")) {
+    identifiedAs = "Particulars of Claim";
+  }
+  else if (text.includes("notice of intention to defend")) {
+    identifiedAs = "Notice of Intention to Defend";
+  }
 
-    item.className = "result-item";
+  const item = document.createElement("div");
 
-    item.innerHTML = `
-      <div class="result-name">
-        ${originalName}
-      </div>
+  item.className = "result-item";
 
-      <div class="result-status">
-        Identified as: <strong>${identifiedAs}</strong>
-      </div>
-    `;
+  item.innerHTML = `
+    <div class="result-name">
+      ${originalName}
+    </div>
 
-    results.appendChild(item);
+    <div class="result-status">
+      Identified as: <strong>${identifiedAs}</strong>
+    </div>
+  `;
+
+  results.appendChild(item);
+
+}
 
   }
 
