@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>CourtLine Bundler</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+      background: #ffffff;
+      color: #2f3720;
+    }
+
+    header {
+      padding: 25px 40px;
+      border-bottom: 1px solid #d8d5d0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    .tagline {
+      color: #666269;
+      margin-top: 8px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .upload-box {
+      margin-top: 35px;
+      padding: 60px 30px;
+      border: 2px dashed #2f3720;
+      border-radius: 12px;
+      background: #d8d5d0;
+    }
+
+    .upload-box h2 {
+      margin-top: 0;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .upload-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: #2f3720;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .privacy {
+      margin-top: 20px;
+      color: #666269;
+      font-size: 14px;
+    }
+
+    #file-list {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .file {
+      padding: 12px;
+      margin-top: 8px;
+      border-bottom: 1px solid #d8d5d0;
+    }
+
+    .counter {
+      margin-top: 70px;
+      padding: 30px;
+      background: #d8d5d0;
+      border-radius: 12px;
+    }
+
+    .counter-number {
+      font-size: 40px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>CourtLine Bundler</h1>
+    <p class="tagline">
+      Preparing Court Online documents for CaseLines.
+    </p>
+  </header>
+
+  <main>
+
+    <h2>Upload your Court Online documents</h2>
+
+    <p>
+      Select all of the PDF documents you downloaded from Court Online.
+    </p>
+
+    <div class="upload-box">
+
+      <h2>Drag and drop your PDFs here</h2>
+
+      <p>or</p>
+
+      <label for="file-upload" class="upload-button">
+        Select Multiple PDF Files
+      </label>
+
+      <input
+        id="file-upload"
+        type="file"
+        multiple
+        accept=".pdf"
+      >
+
+    </div>
+
+    <div id="file-list"></div>
+
+    <p class="privacy">
+      No login required • Your documents are not permanently retained
+    </p>
+
+    <div class="counter">
+
+      <div class="counter-number">0</div>
+
+      <p>Bundles Prepared</p>
+
+    </div>
+
+  </main>
+
+  <script>
+
+    const fileUpload = document.getElementById("file-upload");
+    const fileList = document.getElementById("file-list");
+
+    fileUpload.addEventListener("change", function () {
+
+      fileList.innerHTML = "";
+
+      const files = fileUpload.files;
+
+      for (let i = 0; i < files.length; i++) {
+
+        const file = document.createElement("div");
+
+        file.className = "file";
+
+        file.textContent =
+          "📄 " + files[i].name;
+
+        fileList.appendChild(file);
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
