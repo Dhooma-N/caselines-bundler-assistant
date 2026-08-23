@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>CaseLines Bundler</title>
 
   <style>
-   .process-button {
-  margin-top: 30px;
-  padding: 16px 32px;
-  background: #2f3720;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-family: "Century Gothic", CenturyGothic, sans-serif;
-  font-size: 16px;
-  cursor: pointer;
-}
 
-.process-button:disabled {
-  background: #666269;
-  cursor: not-allowed;
-  opacity: 0.6;
-} 
+    .process-button {
+      margin-top: 30px;
+      padding: 16px 32px;
+      background: #2f3720;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: "Century Gothic", CenturyGothic, sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .process-button:disabled {
+      background: #666269;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     body {
       margin: 0;
       font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
@@ -107,44 +111,66 @@
       font-size: 40px;
       font-weight: bold;
     }
+
     .results {
-  margin-top: 40px;
-  text-align: left;
-}
+      margin-top: 40px;
+      text-align: left;
+    }
 
-.results h2 {
-  text-align: center;
-}
+    .results h2 {
+      text-align: center;
+    }
 
-.result-item {
-  padding: 18px;
-  margin-top: 10px;
-  border: 1px solid #d8d5d0;
-  border-radius: 8px;
-  background: white;
-}
+    .result-item {
+      padding: 18px;
+      margin-top: 10px;
+      border: 1px solid #d8d5d0;
+      border-radius: 8px;
+      background: white;
+    }
 
-.result-name {
-  font-weight: bold;
-  color: #2f3720;
-}
+    .result-name {
+      font-weight: bold;
+      color: #2f3720;
+      font-size: 16px;
+    }
 
-.result-status {
-  margin-top: 6px;
-  color: #666269;
-  font-size: 14px;
-}
+    .result-status {
+      margin-top: 10px;
+      color: #666269;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .confirmed {
+      font-weight: bold;
+    }
+
+    .provisional {
+      font-weight: bold;
+    }
+
+    .date-warning {
+      font-weight: bold;
+    }
+
   </style>
+
 </head>
+
 
 <body>
 
   <header>
+
     <h1>CaseLines Bundler</h1>
+
     <p class="tagline">
       Preparing Court Online documents for CaseLines.
     </p>
+
   </header>
+
 
   <main>
 
@@ -154,13 +180,17 @@
       Select all of the PDF documents you downloaded from Court Online.
     </p>
 
+
     <div class="upload-box">
 
       <h2>Drag and drop your PDFs here</h2>
 
       <p>or</p>
 
-      <label for="file-upload" class="upload-button">
+      <label
+        for="file-upload"
+        class="upload-button"
+      >
         Select Multiple PDF Files
       </label>
 
@@ -173,1107 +203,1726 @@
 
     </div>
 
-    <div id="file-list"></div>
-<button id="process-button" class="process-button" disabled>
-  Process Documents
-</button>
 
-<p id="file-count"></p>
-    <div id="results"></div>
+    <div id="file-list"></div>
+
+
+    <button
+      id="process-button"
+      class="process-button"
+      disabled
+    >
+      Process Documents
+    </button>
+
+
+    <p id="file-count"></p>
+
+
+    <div id="results" class="results"></div>
+
+
     <p class="privacy">
       No login required • Your documents are not permanently retained
     </p>
 
+
     <div class="counter">
 
-      <div class="counter-number">0</div>
+      <div class="counter-number">
+        0
+      </div>
 
-      <p>Bundles Prepared</p>
+      <p>
+        Bundles Prepared
+      </p>
 
     </div>
 
   </main>
 
- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-<script>
+  <!-- PDF.js -->
 
-const fileUpload = document.getElementById("file-upload");
-const fileList = document.getElementById("file-list");
-const processButton = document.getElementById("process-button");
-const fileCount = document.getElementById("file-count");
-const results = document.getElementById("results");
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 
-/* --------------------------------------------------
-   DISPLAY SELECTED FILES
--------------------------------------------------- */
+  <!-- Tesseract OCR -->
 
-fileUpload.addEventListener("change", function () {
-
-  fileList.innerHTML = "";
-  results.innerHTML = "";
-
-  const files = fileUpload.files;
-
-  if (files.length > 0) {
-
-    processButton.disabled = false;
-
-    fileCount.textContent =
-      files.length + " document(s) ready to process";
-
-  } else {
-
-    processButton.disabled = true;
-    fileCount.textContent = "";
-
-  }
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
-  for (let i = 0; i < files.length; i++) {
-
-    const file = document.createElement("div");
-
-    file.className = "file";
-
-    file.textContent = "📄 " + files[i].name;
-
-    fileList.appendChild(file);
-
-  }
-
-});
+  <script>
 
 
-/* --------------------------------------------------
-   READ TEXT FROM A NORMAL PDF
--------------------------------------------------- */
+    /* ==================================================
+       BASIC PAGE ELEMENTS
+    ================================================== */
 
-async function readFirstPage(file) {
+    const fileUpload =
+      document.getElementById("file-upload");
 
-  try {
+    const fileList =
+      document.getElementById("file-list");
 
-    const arrayBuffer = await file.arrayBuffer();
+    const processButton =
+      document.getElementById("process-button");
 
-    const pdf = await pdfjsLib.getDocument({
-      data: arrayBuffer
-    }).promise;
+    const fileCount =
+      document.getElementById("file-count");
 
-    const page = await pdf.getPage(1);
-
-    const textContent = await page.getTextContent();
-
-    const text = textContent.items
-      .map(item => item.str)
-      .join(" ");
-
-    return text;
-
-  } catch (error) {
-
-    console.error("PDF text extraction error:", error);
-
-    return "";
-
-  }
-
-}
+    const results =
+      document.getElementById("results");
 
 
-/* --------------------------------------------------
-   OCR FALLBACK FOR SCANNED PDFs
--------------------------------------------------- */
+    /* ==================================================
+       DISPLAY SELECTED FILES
+    ================================================== */
 
-async function readFirstPageWithOCR(file) {
+    fileUpload.addEventListener(
+      "change",
+      function () {
 
-  try {
+        fileList.innerHTML = "";
+        results.innerHTML = "";
 
-    const arrayBuffer = await file.arrayBuffer();
+        const files = fileUpload.files;
 
-    const pdf = await pdfjsLib.getDocument({
-      data: arrayBuffer
-    }).promise;
 
-    const page = await pdf.getPage(1);
+        if (files.length > 0) {
 
-    const viewport = page.getViewport({
-      scale: 2
-    });
+          processButton.disabled = false;
 
-    const canvas = document.createElement("canvas");
+          fileCount.textContent =
+            files.length +
+            " document(s) ready to process";
 
-    const context = canvas.getContext("2d");
+        } else {
 
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+          processButton.disabled = true;
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport
-    }).promise;
+          fileCount.textContent = "";
 
-    const result = await Tesseract.recognize(
-      canvas,
-      "eng"
+        }
+
+
+        for (
+          let i = 0;
+          i < files.length;
+          i++
+        ) {
+
+          const file =
+            document.createElement("div");
+
+          file.className = "file";
+
+          file.textContent =
+            "📄 " + files[i].name;
+
+          fileList.appendChild(file);
+
+        }
+
+      }
     );
 
-    return result.data.text;
 
-  } catch (error) {
+    /* ==================================================
+       READ TEXT FROM NORMAL PDF
+    ================================================== */
 
-    console.error("OCR error:", error);
+    async function readFirstPage(file) {
 
-    return "";
+      try {
 
-  }
+        const arrayBuffer =
+          await file.arrayBuffer();
 
-}
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
 
+        const page =
+          await pdf.getPage(1);
 
-/* --------------------------------------------------
-   EXTRACT COURT ONLINE FILING DATE
--------------------------------------------------- */
-
-function extractFilingDate(firstPageText) {
-
-  const datePattern =
-    /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
-
-  const match =
-    firstPageText.match(datePattern);
-
-  if (!match) {
-
-    return null;
-
-  }
-
-  const dateParts =
-    match[1].split("/");
-
-  const day =
-    dateParts[0].padStart(2, "0");
-
-  const month =
-    dateParts[1].padStart(2, "0");
-
-  const year =
-    dateParts[2];
-
-  return {
-
-    date: `${year}-${month}-${day}`,
-
-    time: match[2] || ""
-
-  };
-
-}
-
-
-/* --------------------------------------------------
-   COURT ONLINE DOCUMENT TYPES
--------------------------------------------------- */
-
-const courtOnlineTypes = [
-
-  "Addendum",
-  "Affidavit",
-  "Affidavit in support of Default Judgment",
-  "Affidavit in support of Notice to Compel",
-  "Agreement",
-  "Amended Document",
-  "Amended Notice",
-  "Amicus Curiae Application",
-
-  "Annexure 01",
-  "Annexure 02",
-  "Annexure 03",
-  "Annexure 04",
-  "Annexure 05",
-  "Annexure 06",
-  "Annexure 07",
-  "Annexure 08",
-  "Annexure 09",
-  "Annexure 10",
-  "Annexure 11",
-  "Annexure 12",
-  "Annexure 13",
-  "Annexure 14",
-  "Annexure 15",
-  "Annexure 16 and More",
-
-  "Answering Affidavit",
-  "Appeal Record",
-  "Applicant’s Chronology",
-  "Application for Admission date",
-  "Application for Appeal Date",
-  "Application for Automatic Review",
-  "Application for Condonation",
-  "Application for Default Judgment in terms of Rule 31(5)",
-  "Application for Default Judgment (Rule 31(2))",
-  "Application for Eviction (ESTA)",
-  "Application for Eviction (Labour Tenant)",
-  "Application for Family Court Date",
-  "Application for Insolvency Court Hearing Date",
-  "Application for Joinder (Rule 10)",
-  "Application for Opposed Motion Hearing Date",
-  "Application for Opposed Summary Judgment Hearing date",
-  "Application for Pre-Trial Date",
-  "Application for Restitution",
-  "Application for Summary Judgment",
-  "Application for Taxation date",
-  "Application for Trial (RAF) Default Judgment Date",
-  "Application for Trial Date",
-  "Application for Trial Interlocutory Hearing Date",
-  "Application for Trial Settlement Roll Date",
-  "Application for Unopposed Divorce Hearing Date",
-  "Application for Unopposed Motion Hearing Date",
-  "Application for Unopposed Motion Return Date (Rule Nisi)",
-  "Application for Unopposed Summary Judgment Hearing date",
-  "Application for Urgent Court Date",
-  "Application for Variation",
-  "Application to Strike Out",
-
-  "Certificate",
-  "Certificate of Balance",
-  "Certificate of ownership and encumbrances",
-  "Checklist",
-  "Close of Pleadings",
-  "Combined Summons",
-  "Compliance Statement",
-  "Conditions of Sale/ Rule 46",
-  "Confirmatory Affidavit",
-  "Consent Letter",
-  "Contempt Application",
-  "Correspondence",
-  "Counter Claim",
-  "Credit Agreement",
-
-  "Declaration",
-  "Declaratory as Labour Tenant Application",
-  "Deeds",
-  "Directive Compliance",
-  "Discovery – Notice to Inspect Documents",
-  "Discovery Affidavit",
-  "Discovery Notices",
-  "Draft Order",
-
-  "Edictal Citation",
-  "Estate documents",
-  "Exception (Labour Court)",
-  "Expert Notices",
-  "Expert Reports",
-
-  "Founding Affidavit",
-  "Guarantee",
-
-  "Heads of Argument",
-
-  "Index",
-  "Interlocutory Application",
-  "Irregular step/irregular proceedings",
-
-  "Joint Minutes/Pre-trial Minutes",
-  "Judgment",
-  "Judicial Pre-trial Notices",
-
-  "Leave to Appeal",
-  "Legal Practice Council Endorsement Letter",
-  "List of Authorities",
-  "LPC letter of no objection",
-
-  "MC Appeal 01 J111",
-  "MC Appeal Request",
-  "Mediation Notice",
-
-  "NCA Notices & Documents",
-  "NCR Certificate",
-
-  "Notice (Other)",
-  "Notice i.t.o PIE Act S 4 (2)",
-  "Notice i.t.o Rule 36(9)(a)",
-  "Notice i.t.o Rule 36(9)(b)",
-  "Notice in terms of Rule 16A",
-  "Notice in terms of Rule 35(5)",
-  "Notice of Intention to Oppose Taxation",
-  "Notice of Acceptance",
-  "Notice of Amendment",
-  "Notice of Appointment as Attorneys of Record",
-  "Notice of Bar",
-  "Notice of Exception",
-  "Notice of Intention to Defend",
-  "Notice of Intention to Oppose",
-  "Notice of Motion",
-  "Notice of Motion with Hearing Date",
-  "Notice of Opposition to Mediation",
-  "Notice of Removal",
-  "Notice of Sale",
-  "Notice of Set-Down (Excluding Urgent Applications)",
-  "Notice of Taxation (Set Down)",
-  "Notice of Withdrawal as Attorney of Record",
-  "Notice of Withdrawal of Action",
-  "Notice to Abide",
-  "Notice to Compel",
-  "Notice to Withdraw",
-
-  "Offer",
-  "Other",
-
-  "Particulars of Claim",
-  "Petition",
-  "Plea",
-  "Pledge and Cession",
-  "Point in limine",
-  "Power of Attorney",
-  "Practice Notes",
-  "Proof of payment",
-  "Proof of Service",
-
-  "Re-issue of amendment initiating document",
-  "Replication [Rule 25(1)]",
-  "Replying Affidavit",
-  "Report",
-  "Request for further particulars",
-  "Rescission Application",
-  "Resolution",
-  "Respondent’s Chronology",
-  "Return of Service",
-  "Review",
-  "Rule 29(c) – Close of Pleadings",
-  "Rule 37 (2) (b) and (7) Notice",
-  "Rule 43 Application",
-  "Rule 53 Record",
-
-  "SARS final demand",
-  "Schedule",
-  "Search report",
-  "Section 129",
-  "Security for Costs",
-  "Service of Foreign Process",
-  "Settlement Agreement",
-  "Settlement Submissions",
-  "Special Plea",
-  "Statement",
-  "Statement of Claim",
-  "Statement of Response",
-  "Subpoena",
-  "Substitute Service",
-  "Substitute Service Application",
-  "Supplementary Affidavit",
-  "Supporting Documents",
-  "Surety",
-
-  "Tax Invoice",
-  "Third Party Notice (Rule 13)",
-  "Trace Report",
-  "Trial Interlocutory Application",
-
-  "Valuation",
-
-  "Warrant of Arrest",
-  "Warrant of Committal",
-  "Writ of Attachment",
-  "Writ of Ejectment",
-  "Writ of Execution"
-
-];
-
-
-/* --------------------------------------------------
-   CASELINES SECTIONS
--------------------------------------------------- */
-
-const caseLinesSections = [
-
-  "001 - Notice of Motion with Founding Affidavit",
-  "002 - Simple Summons",
-  "003 - Provisional Sentence Summons",
-  "004 - Combined Summons",
-  "005 - Return Of Service",
-  "006 - Declaration",
-  "007 - Notice of Intention to Oppose / Defend",
-  "008 - Counter-Claim",
-  "009 - Answering Affidavit",
-  "010 - Replying Affidavit",
-  "011 - Supplementary Affidavit",
-  "012 - Confirmatory Affidavit",
-  "013 - Particulars of Claim",
-  "014 - Request for Further Particulars",
-  "015 - Notice to Compel",
-  "016 - Affidavit in Support of Notice to Compel",
-  "017 - Subpoena",
-  "018 - Notice of Bar",
-  "019 - Notice of Removal/Application to Strike Out",
-  "020 - Notice of Substitution",
-  "021 - Application for Substituted Service",
-  "022 - Notice of Withdrawal of Action",
-  "023 - Warrant of Execution",
-  "024 - Notice of Withdrawal as Attorneys of Records",
-  "025 - Notice of Appointment as Attorneys of Records",
-  "026 - Application for Summary Judgment",
-  "027 - Rule 43 Application",
-  "028 - Discovery Notices",
-  "029 - Practice Notes",
-  "030 - Plea or Special Plea",
-  "031 - Notice of Exception",
-  "032 - Expert Notices",
-  "033 - Expert Reports",
-  "034 - Notice of Amendment",
-  "035 - Notice of Sale",
-  "036 - Application for Edictal Citation",
-  "037 - Notice of Inspection",
-  "038 - Notice of Intention to Defend",
-  "039 - Notice of Application to Strike Out",
-  "040 - Notice of Sale in Execution",
-  "041 - Provisional Set Down",
-  "042 - Final Set Down/Notice of Set Down",
-  "043 - Notice of Pre-Trial Conference",
-  "044 - Notice of Set-Down",
-  "045 - Joint Minutes",
-  "046 - Application for Trial Date",
-  "047 - Trial interlocutory Application",
-  "048 - Any other interlocutory Application",
-  "049 - Application for Admission As Amicus Curiae",
-  "050 - Notice of Judicial Pre-Trial Conference",
-  "051 - Third Party Notice (Rule 13)",
-  "052 - Joinder of Parties (Rule 10)",
-  "053 - Index and Pagination",
-  "054 - Heads of Argument",
-  "055 - List Authorities",
-  "056 - Application of Default Judgement",
-  "057 - Warrant of Execution",
-  "058 - Affidavit in Support of Default Judgement",
-  "059 - Notice in terms of Rule 31(5)",
-  "060 - Confirmation of Deed of Cession",
-  "061 - NCR Certificate of Plaintiff",
-  "062 - NCR Proof of Renewal",
-  "063 - Credit Agreement/Instalment Agreement",
-  "064 - Statement",
-  "065 - Section 129 & Proof of Post",
-  "066 - Track and Trace",
-  "067 - Certificate of Balance",
-  "068 - Natis Document",
-  "069 - Compliance Certificate",
-  "070 - Updated NCR Certificates for Plaintiff",
-  "071 - Confirmation of Registration Letters",
-  "072 - Security for Costs",
-  "073 - Notice of Taxation with Bill of Costs",
-  "074 - Draft Court Order/Court Order",
-  "075 - Leave to Appeal"
-
-];
-
-
-/* --------------------------------------------------
-   EXPLICIT COURT ONLINE → CASELINES
--------------------------------------------------- */
-
-const caseLinesMapping = {
-
-  "Notice of Motion":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Founding Affidavit":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Combined Summons":
-    "004 - Combined Summons",
-
-  "Return of Service":
-    "005 - Return Of Service",
-
-  "Declaration":
-    "006 - Declaration",
-
-  "Notice of Intention to Oppose":
-    "007 - Notice of Intention to Oppose / Defend",
-
-  "Notice of Intention to Defend":
-    "007 - Notice of Intention to Oppose / Defend",
-
-  "Counter Claim":
-    "008 - Counter-Claim",
-
-  "Answering Affidavit":
-    "009 - Answering Affidavit",
-
-  "Replying Affidavit":
-    "010 - Replying Affidavit",
-
-  "Supplementary Affidavit":
-    "011 - Supplementary Affidavit",
-
-  "Confirmatory Affidavit":
-    "012 - Confirmatory Affidavit",
-
-  "Particulars of Claim":
-    "013 - Particulars of Claim",
-
-  "Request for further particulars":
-    "014 - Request for Further Particulars",
-
-  "Notice to Compel":
-    "015 - Notice to Compel",
-
-  "Affidavit in support of Notice to Compel":
-    "016 - Affidavit in Support of Notice to Compel",
-
-  "Subpoena":
-    "017 - Subpoena",
-
-  "Notice of Bar":
-    "018 - Notice of Bar",
-
-  "Notice of Removal":
-    "019 - Notice of Removal/Application to Strike Out",
-
-  "Application to Strike Out":
-    "019 - Notice of Removal/Application to Strike Out",
-
-  "Substitute Service":
-    "021 - Application for Substituted Service",
-
-  "Substitute Service Application":
-    "021 - Application for Substituted Service",
-
-  "Notice of Withdrawal of Action":
-    "022 - Notice of Withdrawal of Action",
-
-  "Writ of Execution":
-    "023 - Warrant of Execution",
-
-  "Notice of Withdrawal as Attorney of Record":
-    "024 - Notice of Withdrawal as Attorneys of Records",
-
-  "Notice of Appointment as Attorneys of Record":
-    "025 - Notice of Appointment as Attorneys of Records",
-
-  "Application for Summary Judgment":
-    "026 - Application for Summary Judgment",
-
-  "Rule 43 Application":
-    "027 - Rule 43 Application",
-
-  "Discovery Notices":
-    "028 - Discovery Notices",
-
-  "Practice Notes":
-    "029 - Practice Notes",
-
-  "Plea":
-    "030 - Plea or Special Plea",
-
-  "Special Plea":
-    "030 - Plea or Special Plea",
-
-  "Notice of Exception":
-    "031 - Notice of Exception",
-
-  "Expert Notices":
-    "032 - Expert Notices",
-
-  "Expert Reports":
-    "033 - Expert Reports",
-
-  "Notice of Amendment":
-    "034 - Notice of Amendment",
-
-  "Notice of Sale":
-    "035 - Notice of Sale",
-
-  "Edictal Citation":
-    "036 - Application for Edictal Citation",
-
-  "Application for Edictal Citation":
-    "036 - Application for Edictal Citation",
-
-  "Discovery – Notice to Inspect Documents":
-    "037 - Notice of Inspection",
-
-  "Application for Trial Date":
-    "046 - Application for Trial Date",
-
-  "Trial Interlocutory Application":
-    "047 - Trial interlocutory Application",
-
-  "Application for Joinder (Rule 10)":
-    "052 - Joinder of Parties (Rule 10)",
-
-  "Third Party Notice (Rule 13)":
-    "051 - Third Party Notice (Rule 13)",
-
-  "Heads of Argument":
-    "054 - Heads of Argument",
-
-  "List of Authorities":
-    "055 - List Authorities",
-
-  "Application for Default Judgment (Rule 31(2))":
-    "056 - Application of Default Judgement",
-
-  "Affidavit in support of Default Judgment":
-    "058 - Affidavit in Support of Default Judgement",
-
-  "Notice in terms of Rule 35(5)":
-    "028 - Discovery Notices",
-
-  "Certificate of Balance":
-    "067 - Certificate of Balance",
-
-  "Credit Agreement":
-    "063 - Credit Agreement/Instalment Agreement",
-
-  "Statement":
-    "064 - Statement",
-
-  "Section 129":
-    "065 - Section 129 & Proof of Post",
-
-  "Security for Costs":
-    "072 - Security for Costs",
-
-  "Leave to Appeal":
-    "075 - Leave to Appeal"
-
-};
-
-
-/* --------------------------------------------------
-   SUPPLIED AMBIGUOUS / COMMON MAPPINGS
--------------------------------------------------- */
-
-const suppliedCaseLinesMapping = {
-
-  "Annexure 01": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 02": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 03": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 04": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 05": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 06": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 07": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 08": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 09": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 10": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 11": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 12": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 13": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 14": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 15": "001 - Notice of Motion with Founding Affidavit",
-  "Annexure 16 and More": "001 - Notice of Motion with Founding Affidavit",
-
-  "Answering Affidavit":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Application for Admission date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Appeal Date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Automatic Review":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Application for Condonation":
-    "048 - Any other interlocutory Application",
-
-  "Application for Eviction (ESTA)":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Application for Summary Judgment":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Application for Taxation date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Unopposed Divorce Hearing Date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Unopposed Motion Hearing Date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Unopposed Motion Return Date (Rule Nisi)":
-    "048 - Any other interlocutory Application",
-
-  "Application for Unopposed Summary Judgment Hearing date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Urgent Court Date":
-    "048 - Any other interlocutory Application",
-
-  "Application for Variation":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Application to Strike Out":
-    "048 - Any other interlocutory Application"
-
-};
-
-
-/* --------------------------------------------------
-   CASELINES MAPPING LOGIC
--------------------------------------------------- */
-
-function getCaseLinesSection(courtOnlineType) {
-
-  /* FIRST: supplied ambiguous mappings */
-
-  if (suppliedCaseLinesMapping[courtOnlineType]) {
-
-    return {
-      section: suppliedCaseLinesMapping[courtOnlineType],
-      status: "Provisional - Review Required"
+        const textContent =
+          await page.getTextContent();
+
+        const text =
+          textContent.items
+            .map(item => item.str)
+            .join(" ");
+
+        return text;
+
+      } catch (error) {
+
+        console.error(
+          "PDF text extraction error:",
+          error
+        );
+
+        return "";
+
+      }
+
+    }
+
+
+    /* ==================================================
+       OCR FALLBACK
+    ================================================== */
+
+    async function readFirstPageWithOCR(file) {
+
+      try {
+
+        const arrayBuffer =
+          await file.arrayBuffer();
+
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
+
+        const page =
+          await pdf.getPage(1);
+
+        const viewport =
+          page.getViewport({
+            scale: 2
+          });
+
+        const canvas =
+          document.createElement("canvas");
+
+        const context =
+          canvas.getContext("2d");
+
+        canvas.width =
+          viewport.width;
+
+        canvas.height =
+          viewport.height;
+
+
+        await page.render({
+
+          canvasContext: context,
+
+          viewport: viewport
+
+        }).promise;
+
+
+        const result =
+          await Tesseract.recognize(
+            canvas,
+            "eng"
+          );
+
+
+        return result.data.text;
+
+      } catch (error) {
+
+        console.error(
+          "OCR error:",
+          error
+        );
+
+        return "";
+
+      }
+
+    }
+
+
+    /* ==================================================
+       EXTRACT COURT ONLINE FILING DATE
+    ================================================== */
+
+    function extractFilingDate(firstPageText) {
+
+      const datePattern =
+        /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
+
+
+      const match =
+        firstPageText.match(datePattern);
+
+
+      if (!match) {
+
+        return null;
+
+      }
+
+
+      const dateParts =
+        match[1].split("/");
+
+
+      const day =
+        dateParts[0].padStart(2, "0");
+
+
+      const month =
+        dateParts[1].padStart(2, "0");
+
+
+      const year =
+        dateParts[2];
+
+
+      return {
+
+        date:
+          `${year}-${month}-${day}`,
+
+        time:
+          match[2] || ""
+
+      };
+
+    }
+
+
+    /* ==================================================
+       COURT ONLINE DOCUMENT TYPES
+    ================================================== */
+
+    const courtOnlineTypes = [
+
+      "Addendum",
+
+      "Affidavit",
+
+      "Affidavit in support of Default Judgment",
+
+      "Affidavit in support of Notice to Compel",
+
+      "Agreement",
+
+      "Amended Document",
+
+      "Amended Notice",
+
+      "Amicus Curiae Application",
+
+      "Annexure 01",
+      "Annexure 02",
+      "Annexure 03",
+      "Annexure 04",
+      "Annexure 05",
+      "Annexure 06",
+      "Annexure 07",
+      "Annexure 08",
+      "Annexure 09",
+      "Annexure 10",
+      "Annexure 11",
+      "Annexure 12",
+      "Annexure 13",
+      "Annexure 14",
+      "Annexure 15",
+      "Annexure 16 and More",
+
+      "Answering Affidavit",
+
+      "Appeal Record",
+
+      "Applicant’s Chronology",
+
+      "Application for Admission date",
+
+      "Application for Appeal Date",
+
+      "Application for Automatic Review",
+
+      "Application for Condonation",
+
+      "Application for Default Judgment in terms of Rule 31(5)",
+
+      "Application for Default Judgment (Rule 31(2))",
+
+      "Application for Eviction (ESTA)",
+
+      "Application for Eviction (Labour Tenant)",
+
+      "Application for Family Court Date",
+
+      "Application for Insolvency Court Hearing Date",
+
+      "Application for Joinder (Rule 10)",
+
+      "Application for Opposed Motion Hearing Date",
+
+      "Application for Opposed Summary Judgment Hearing date",
+
+      "Application for Pre-Trial Date",
+
+      "Application for Restitution",
+
+      "Application for Summary Judgment",
+
+      "Application for Taxation date",
+
+      "Application for Trial (RAF) Default Judgment Date",
+
+      "Application for Trial Date",
+
+      "Application for Trial Interlocutory Hearing Date",
+
+      "Application for Trial Settlement Roll Date",
+
+      "Application for Unopposed Divorce Hearing Date",
+
+      "Application for Unopposed Motion Hearing Date",
+
+      "Application for Unopposed Motion Return Date (Rule Nisi)",
+
+      "Application for Unopposed Summary Judgment Hearing date",
+
+      "Application for Urgent Court Date",
+
+      "Application for Variation",
+
+      "Application to Strike Out",
+
+      "Certificate",
+
+      "Certificate of Balance",
+
+      "Certificate of ownership and encumbrances",
+
+      "Checklist",
+
+      "Close of Pleadings",
+
+      "Combined Summons",
+
+      "Compliance Statement",
+
+      "Conditions of Sale/ Rule 46",
+
+      "Confirmatory Affidavit",
+
+      "Consent Letter",
+
+      "Contempt Application",
+
+      "Correspondence",
+
+      "Counter Claim",
+
+      "Credit Agreement",
+
+      "Declaration",
+
+      "Declaratory as Labour Tenant Application",
+
+      "Deeds",
+
+      "Directive Compliance",
+
+      "Discovery – Notice to Inspect Documents",
+
+      "Discovery Affidavit",
+
+      "Discovery Notices",
+
+      "Draft Order",
+
+      "Edictal Citation",
+
+      "Estate documents",
+
+      "Exception (Labour Court)",
+
+      "Expert Notices",
+
+      "Expert Reports",
+
+      "Founding Affidavit",
+
+      "Guarantee",
+
+      "Heads of Argument",
+
+      "Index",
+
+      "Interlocutory Application",
+
+      "Irregular step/irregular proceedings",
+
+      "Joint Minutes/Pre-trial Minutes",
+
+      "Judgment",
+
+      "Judicial Pre-trial Notices",
+
+      "Leave to Appeal",
+
+      "Legal Practice Council Endorsement Letter",
+
+      "List of Authorities",
+
+      "LPC letter of no objection",
+
+      "MC Appeal 01 J111",
+
+      "MC Appeal Request",
+
+      "Mediation Notice",
+
+      "NCA Notices & Documents",
+
+      "NCR Certificate",
+
+      "Notice (Other)",
+
+      "Notice i.t.o PIE Act S 4 (2)",
+
+      "Notice i.t.o Rule 36(9)(a)",
+
+      "Notice i.t.o Rule 36(9)(b)",
+
+      "Notice in terms of Rule 16A",
+
+      "Notice in terms of Rule 35(5)",
+
+      "Notice of Intention to Oppose Taxation",
+
+      "Notice of Acceptance",
+
+      "Notice of Amendment",
+
+      "Notice of Appointment as Attorneys of Record",
+
+      "Notice of Bar",
+
+      "Notice of Exception",
+
+      "Notice of Intention to Defend",
+
+      "Notice of Intention to Oppose",
+
+      "Notice of Motion",
+
+      "Notice of Motion with Hearing Date",
+
+      "Notice of Opposition to Mediation",
+
+      "Notice of Removal",
+
+      "Notice of Sale",
+
+      "Notice of Set-Down (Excluding Urgent Applications)",
+
+      "Notice of Taxation (Set Down)",
+
+      "Notice of Withdrawal as Attorney of Record",
+
+      "Notice of Withdrawal of Action",
+
+      "Notice to Abide",
+
+      "Notice to Compel",
+
+      "Notice to Withdraw",
+
+      "Offer",
+
+      "Other",
+
+      "Particulars of Claim",
+
+      "Petition",
+
+      "Plea",
+
+      "Pledge and Cession",
+
+      "Point in limine",
+
+      "Power of Attorney",
+
+      "Practice Notes",
+
+      "Proof of payment",
+
+      "Proof of Service",
+
+      "Re-issue of amendment initiating document",
+
+      "Replication [Rule 25(1)]",
+
+      "Replying Affidavit",
+
+      "Report",
+
+      "Request for further particulars",
+
+      "Rescission Application",
+
+      "Resolution",
+
+      "Respondent’s Chronology",
+
+      "Return of Service",
+
+      "Review",
+
+      "Rule 29(c) – Close of Pleadings",
+
+      "Rule 37 (2) (b) and (7) Notice",
+
+      "Rule 43 Application",
+
+      "Rule 53 Record",
+
+      "SARS final demand",
+
+      "Schedule",
+
+      "Search report",
+
+      "Section 129",
+
+      "Security for Costs",
+
+      "Service of Foreign Process",
+
+      "Settlement Agreement",
+
+      "Settlement Submissions",
+
+      "Special Plea",
+
+      "Statement",
+
+      "Statement of Claim",
+
+      "Statement of Response",
+
+      "Subpoena",
+
+      "Substitute Service",
+
+      "Substitute Service Application",
+
+      "Supplementary Affidavit",
+
+      "Supporting Documents",
+
+      "Surety",
+
+      "Tax Invoice",
+
+      "Third Party Notice (Rule 13)",
+
+      "Trace Report",
+
+      "Trial Interlocutory Application",
+
+      "Valuation",
+
+      "Warrant of Arrest",
+
+      "Warrant of Committal",
+
+      "Writ of Attachment",
+
+      "Writ of Ejectment",
+
+      "Writ of Execution"
+
+    ];
+
+
+    /* ==================================================
+       CASELINES SECTIONS
+    ================================================== */
+
+    const caseLinesSections = [
+
+      "001 - Notice of Motion with Founding Affidavit",
+
+      "002 - Simple Summons",
+
+      "003 - Provisional Sentence Summons",
+
+      "004 - Combined Summons",
+
+      "005 - Return Of Service",
+
+      "006 - Declaration",
+
+      "007 - Notice of Intention to Oppose / Defend",
+
+      "008 - Counter-Claim",
+
+      "009 - Answering Affidavit",
+
+      "010 - Replying Affidavit",
+
+      "011 - Supplementary Affidavit",
+
+      "012 - Confirmatory Affidavit",
+
+      "013 - Particulars of Claim",
+
+      "014 - Request for Further Particulars",
+
+      "015 - Notice to Compel",
+
+      "016 - Affidavit in Support of Notice to Compel",
+
+      "017 - Subpoena",
+
+      "018 - Notice of Bar",
+
+      "019 - Notice of Removal/Application to Strike Out",
+
+      "020 - Notice of Substitution",
+
+      "021 - Application for Substituted Service",
+
+      "022 - Notice of Withdrawal of Action",
+
+      "023 - Warrant of Execution",
+
+      "024 - Notice of Withdrawal as Attorneys of Records",
+
+      "025 - Notice of Appointment as Attorneys of Records",
+
+      "026 - Application for Summary Judgment",
+
+      "027 - Rule 43 Application",
+
+      "028 - Discovery Notices",
+
+      "029 - Practice Notes",
+
+      "030 - Plea or Special Plea",
+
+      "031 - Notice of Exception",
+
+      "032 - Expert Notices",
+
+      "033 - Expert Reports",
+
+      "034 - Notice of Amendment",
+
+      "035 - Notice of Sale",
+
+      "036 - Application for Edictal Citation",
+
+      "037 - Notice of Inspection",
+
+      "038 - Notice of Intention to Defend",
+
+      "039 - Notice of Application to Strike Out",
+
+      "040 - Notice of Sale in Execution",
+
+      "041 - Provisional Set Down",
+
+      "042 - Final Set Down/Notice of Set Down",
+
+      "043 - Notice of Pre-Trial Conference",
+
+      "044 - Notice of Set-Down",
+
+      "045 - Joint Minutes",
+
+      "046 - Application for Trial Date",
+
+      "047 - Trial interlocutory Application",
+
+      "048 - Any other interlocutory Application",
+
+      "049 - Application for Admission As Amicus Curiae",
+
+      "050 - Notice of Judicial Pre-Trial Conference",
+
+      "051 - Third Party Notice (Rule 13)",
+
+      "052 - Joinder of Parties (Rule 10)",
+
+      "053 - Index and Pagination",
+
+      "054 - Heads of Argument",
+
+      "055 - List Authorities",
+
+      "056 - Application of Default Judgement",
+
+      "057 - Warrant of Execution",
+
+      "058 - Affidavit in Support of Default Judgement",
+
+      "059 - Notice in terms of Rule 31(5)",
+
+      "060 - Confirmation of Deed of Cession",
+
+      "061 - NCR Certificate of Plaintiff",
+
+      "062 - NCR Proof of Renewal",
+
+      "063 - Credit Agreement/Instalment Agreement",
+
+      "064 - Statement",
+
+      "065 - Section 129 & Proof of Post",
+
+      "066 - Track and Trace",
+
+      "067 - Certificate of Balance",
+
+      "068 - Natis Document",
+
+      "069 - Compliance Certificate",
+
+      "070 - Updated NCR Certificates for Plaintiff",
+
+      "071 - Confirmation of Registration Letters",
+
+      "072 - Security for Costs",
+
+      "073 - Notice of Taxation with Bill of Costs",
+
+      "074 - Draft Court Order/Court Order",
+
+      "075 - Leave to Appeal"
+
+    ];
+
+
+    /* ==================================================
+       EXPLICIT MAPPING
+    ================================================== */
+
+    const caseLinesMapping = {
+
+      "Notice of Motion":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Founding Affidavit":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Combined Summons":
+        "004 - Combined Summons",
+
+      "Return of Service":
+        "005 - Return Of Service",
+
+      "Declaration":
+        "006 - Declaration",
+
+      "Notice of Intention to Oppose":
+        "007 - Notice of Intention to Oppose / Defend",
+
+      "Notice of Intention to Defend":
+        "007 - Notice of Intention to Oppose / Defend",
+
+      "Counter Claim":
+        "008 - Counter-Claim",
+
+      "Answering Affidavit":
+        "009 - Answering Affidavit",
+
+      "Replying Affidavit":
+        "010 - Replying Affidavit",
+
+      "Supplementary Affidavit":
+        "011 - Supplementary Affidavit",
+
+      "Confirmatory Affidavit":
+        "012 - Confirmatory Affidavit",
+
+      "Particulars of Claim":
+        "013 - Particulars of Claim",
+
+      "Request for further particulars":
+        "014 - Request for Further Particulars",
+
+      "Notice to Compel":
+        "015 - Notice to Compel",
+
+      "Affidavit in support of Notice to Compel":
+        "016 - Affidavit in Support of Notice to Compel",
+
+      "Subpoena":
+        "017 - Subpoena",
+
+      "Notice of Bar":
+        "018 - Notice of Bar",
+
+      "Notice of Removal":
+        "019 - Notice of Removal/Application to Strike Out",
+
+      "Application to Strike Out":
+        "019 - Notice of Removal/Application to Strike Out",
+
+      "Substitute Service":
+        "021 - Application for Substituted Service",
+
+      "Substitute Service Application":
+        "021 - Application for Substituted Service",
+
+      "Notice of Withdrawal of Action":
+        "022 - Notice of Withdrawal of Action",
+
+      "Writ of Execution":
+        "023 - Warrant of Execution",
+
+      "Notice of Withdrawal as Attorney of Record":
+        "024 - Notice of Withdrawal as Attorneys of Records",
+
+      "Notice of Appointment as Attorneys of Record":
+        "025 - Notice of Appointment as Attorneys of Records",
+
+      "Application for Summary Judgment":
+        "026 - Application for Summary Judgment",
+
+      "Rule 43 Application":
+        "027 - Rule 43 Application",
+
+      "Discovery Notices":
+        "028 - Discovery Notices",
+
+      "Practice Notes":
+        "029 - Practice Notes",
+
+      "Plea":
+        "030 - Plea or Special Plea",
+
+      "Special Plea":
+        "030 - Plea or Special Plea",
+
+      "Notice of Exception":
+        "031 - Notice of Exception",
+
+      "Expert Notices":
+        "032 - Expert Notices",
+
+      "Expert Reports":
+        "033 - Expert Reports",
+
+      "Notice of Amendment":
+        "034 - Notice of Amendment",
+
+      "Notice of Sale":
+        "035 - Notice of Sale",
+
+      "Edictal Citation":
+        "036 - Application for Edictal Citation",
+
+      "Application for Edictal Citation":
+        "036 - Application for Edictal Citation",
+
+      "Discovery – Notice to Inspect Documents":
+        "037 - Notice of Inspection",
+
+      "Application for Trial Date":
+        "046 - Application for Trial Date",
+
+      "Trial Interlocutory Application":
+        "047 - Trial interlocutory Application",
+
+      "Application for Joinder (Rule 10)":
+        "052 - Joinder of Parties (Rule 10)",
+
+      "Third Party Notice (Rule 13)":
+        "051 - Third Party Notice (Rule 13)",
+
+      "Heads of Argument":
+        "054 - Heads of Argument",
+
+      "List of Authorities":
+        "055 - List Authorities",
+
+      "Application for Default Judgment (Rule 31(2))":
+        "056 - Application of Default Judgement",
+
+      "Affidavit in support of Default Judgment":
+        "058 - Affidavit in Support of Default Judgement",
+
+      "Notice in terms of Rule 35(5)":
+        "028 - Discovery Notices",
+
+      "Certificate of Balance":
+        "067 - Certificate of Balance",
+
+      "Credit Agreement":
+        "063 - Credit Agreement/Instalment Agreement",
+
+      "Statement":
+        "064 - Statement",
+
+      "Section 129":
+        "065 - Section 129 & Proof of Post",
+
+      "Security for Costs":
+        "072 - Security for Costs",
+
+      "Leave to Appeal":
+        "075 - Leave to Appeal"
+
     };
 
-  }
 
+    /* ==================================================
+       SUPPLIED COMMON / AMBIGUOUS MAPPING
+    ================================================== */
 
-  /* SECOND: explicit mappings */
+    const suppliedCaseLinesMapping = {
 
-  if (caseLinesMapping[courtOnlineType]) {
+      "Annexure 01":
+        "001 - Notice of Motion with Founding Affidavit",
 
-    return {
-      section: caseLinesMapping[courtOnlineType],
-      status: "Confirmed"
+      "Annexure 02":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 03":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 04":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 05":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 06":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 07":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 08":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 09":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 10":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 11":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 12":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 13":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 14":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 15":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Annexure 16 and More":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Answering Affidavit":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Application for Admission date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Appeal Date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Automatic Review":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Application for Condonation":
+        "048 - Any other interlocutory Application",
+
+      "Application for Eviction (ESTA)":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Application for Summary Judgment":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Application for Taxation date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Unopposed Divorce Hearing Date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Unopposed Motion Hearing Date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Unopposed Motion Return Date (Rule Nisi)":
+        "048 - Any other interlocutory Application",
+
+      "Application for Unopposed Summary Judgment Hearing date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Urgent Court Date":
+        "048 - Any other interlocutory Application",
+
+      "Application for Variation":
+        "001 - Notice of Motion with Founding Affidavit",
+
+      "Application to Strike Out":
+        "048 - Any other interlocutory Application"
+
     };
 
-  }
+
+    /* ==================================================
+       NORMALISE TEXT
+    ================================================== */
+
+    function normaliseText(value) {
+
+      return value
+        .toLowerCase()
+        .replace(/[’‘]/g, "'")
+        .replace(/[–—-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    }
 
 
-  /* THIRD: provisional matching */
+    /* ==================================================
+       IDENTIFY COURT ONLINE DOCUMENT TYPE
+    ================================================== */
 
-  const provisional =
-    findProvisionalCaseLinesSection(
+    function identifyCourtOnlineType(firstPageText) {
+
+      const normalisedText =
+        normaliseText(firstPageText);
+
+
+      const sortedTypes =
+        [...courtOnlineTypes].sort(
+          (a, b) => b.length - a.length
+        );
+
+
+      for (
+        const documentType
+        of sortedTypes
+      ) {
+
+        const normalisedType =
+          normaliseText(documentType);
+
+
+        if (
+          normalisedText.includes(
+            normalisedType
+          )
+        ) {
+
+          return documentType;
+
+        }
+
+      }
+
+
+      return null;
+
+    }
+
+
+    /* ==================================================
+       PROVISIONAL CASELINES MATCH
+    ================================================== */
+
+    function findProvisionalCaseLinesSection(
       courtOnlineType
-    );
-
-  if (provisional) {
-
-    return {
-      section: provisional,
-      status: "Provisional - Review Required"
-    };
-
-  }
-
-
-  return {
-    section: "048 - Any other interlocutory Application",
-    status: "Provisional - Review Required"
-  };
-
-}
-
-
-function findProvisionalCaseLinesSection(courtOnlineType) {
-
-  const type =
-    courtOnlineType.toLowerCase();
-
-
-  if (type.includes("application")) {
-
-    return "048 - Any other interlocutory Application";
-
-  }
-
-
-  if (type.includes("notice")) {
-
-    return "044 - Notice of Set-Down";
-
-  }
-
-
-  if (type.includes("affidavit")) {
-
-    return "001 - Notice of Motion with Founding Affidavit";
-
-  }
-
-
-  if (type.includes("report")) {
-
-    return "033 - Expert Reports";
-
-  }
-
-
-  return null;
-
-}
-
-
-/* --------------------------------------------------
-   NORMALISE TEXT
--------------------------------------------------- */
-
-function normaliseText(value) {
-
-  return value
-    .toLowerCase()
-    .replace(/[’‘]/g, "'")
-    .replace(/[–—-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-}
-
-
-/* --------------------------------------------------
-   IDENTIFY COURT ONLINE TYPE
--------------------------------------------------- */
-
-function identifyCourtOnlineType(firstPageText) {
-
-  const normalisedText =
-    normaliseText(firstPageText);
-
-  const sortedTypes =
-    [...courtOnlineTypes].sort(
-      (a, b) => b.length - a.length
-    );
-
-
-  for (const documentType of sortedTypes) {
-
-    const normalisedType =
-      normaliseText(documentType);
-
-    if (
-      normalisedText.includes(normalisedType)
     ) {
 
-      return documentType;
-
-    }
-
-  }
+      const type =
+        courtOnlineType.toLowerCase();
 
 
-  return null;
+      if (
+        type.includes("application")
+      ) {
 
-}
+        return "048 - Any other interlocutory Application";
 
-
-/* --------------------------------------------------
-   PROCESS DOCUMENTS
--------------------------------------------------- */
-
-processButton.addEventListener("click", async function () {
-
-  const files = fileUpload.files;
-
-  if (!files || files.length === 0) {
-
-    return;
-
-  }
+      }
 
 
-  processButton.textContent =
-    "Processing Documents...";
+      if (
+        type.includes("notice")
+      ) {
 
-  processButton.disabled = true;
+        return "044 - Notice of Set-Down";
 
-  results.innerHTML =
-    "<h2>Processing Results</h2>";
-
-
-  const processedDocuments = [];
+      }
 
 
-  /* -----------------------------------------------
-     READ AND CLASSIFY EVERY DOCUMENT
-  ----------------------------------------------- */
+      if (
+        type.includes("affidavit")
+      ) {
 
-  for (let i = 0; i < files.length; i++) {
+        return "001 - Notice of Motion with Founding Affidavit";
 
-    const originalName =
-      files[i].name;
-
-
-    let firstPageText =
-      await readFirstPage(files[i]);
+      }
 
 
-    if (
-      !firstPageText ||
-      firstPageText.trim().length < 10
-    ) {
+      if (
+        type.includes("report")
+      ) {
 
-      firstPageText =
-        await readFirstPageWithOCR(files[i]);
+        return "033 - Expert Reports";
+
+      }
+
+
+      if (
+        type.includes("summons")
+      ) {
+
+        if (
+          type.includes("combined")
+        ) {
+
+          return "004 - Combined Summons";
+
+        }
+
+        return "002 - Simple Summons";
+
+      }
+
+
+      if (
+        type.includes("plea")
+      ) {
+
+        return "030 - Plea or Special Plea";
+
+      }
+
+
+      if (
+        type.includes("statement")
+      ) {
+
+        return "064 - Statement";
+
+      }
+
+
+      return null;
 
     }
 
 
-    /* Identify Court Online type */
+    /* ==================================================
+       GET CASELINES SECTION
+    ================================================== */
 
-    const identifiedAs =
-      identifyCourtOnlineType(firstPageText);
+    function getCaseLinesSection(
+      courtOnlineType
+    ) {
+
+      /*
+        STEP 1:
+        Supplied common/ambiguous mapping
+      */
+
+      if (
+        suppliedCaseLinesMapping[
+          courtOnlineType
+        ]
+      ) {
+
+        return {
+
+          section:
+            suppliedCaseLinesMapping[
+              courtOnlineType
+            ],
+
+          status:
+            "Provisional - Review Required"
+
+        };
+
+      }
 
 
-    /* Extract filing date */
+      /*
+        STEP 2:
+        Explicit mapping
+      */
 
-    const filingInfo =
-      extractFilingDate(firstPageText);
+      if (
+        caseLinesMapping[
+          courtOnlineType
+        ]
+      ) {
+
+        return {
+
+          section:
+            caseLinesMapping[
+              courtOnlineType
+            ],
+
+          status:
+            "Confirmed"
+
+        };
+
+      }
 
 
-    /* Determine CaseLines destination */
+      /*
+        STEP 3:
+        Provisional matching
+      */
 
-    const mapping =
-      identifiedAs
-        ? getCaseLinesSection(identifiedAs)
-        : {
+      const provisional =
+        findProvisionalCaseLinesSection(
+          courtOnlineType
+        );
+
+
+      if (provisional) {
+
+        return {
+
+          section:
+            provisional,
+
+          status:
+            "Provisional - Review Required"
+
+        };
+
+      }
+
+
+      /*
+        STEP 4:
+        Nothing sensible found
+      */
+
+      return {
+
+        section:
+          "048 - Any other interlocutory Application",
+
+        status:
+          "Provisional - Review Required"
+
+      };
+
+    }
+
+
+    /* ==================================================
+       PROCESS DOCUMENTS
+    ================================================== */
+
+    processButton.addEventListener(
+      "click",
+      async function () {
+
+        const files =
+          fileUpload.files;
+
+
+        if (
+          !files ||
+          files.length === 0
+        ) {
+
+          return;
+
+        }
+
+
+        processButton.textContent =
+          "Processing Documents...";
+
+        processButton.disabled =
+          true;
+
+
+        results.innerHTML =
+          "<h2>Processing Results</h2>";
+
+
+        const processedDocuments = [];
+
+
+        /*
+          PROCESS EACH PDF
+        */
+
+        for (
+          let i = 0;
+          i < files.length;
+          i++
+        ) {
+
+          const file =
+            files[i];
+
+
+          const originalName =
+            file.name;
+
+
+          /*
+            FIRST:
+            Try normal PDF text
+          */
+
+          let firstPageText =
+            await readFirstPage(file);
+
+
+          /*
+            SECOND:
+            OCR fallback
+          */
+
+          if (
+            !firstPageText ||
+            firstPageText.trim().length < 10
+          ) {
+
+            firstPageText =
+              await readFirstPageWithOCR(file);
+
+          }
+
+
+          /*
+            IDENTIFY DOCUMENT TYPE
+          */
+
+          const identifiedAs =
+            identifyCourtOnlineType(
+              firstPageText
+            );
+
+
+          /*
+            EXTRACT FILING DATE
+          */
+
+          const filingInfo =
+            extractFilingDate(
+              firstPageText
+            );
+
+
+          /*
+            MAP TO CASELINES
+          */
+
+          const mapping =
+            identifiedAs
+              ? getCaseLinesSection(
+                  identifiedAs
+                )
+              : {
+
+                  section:
+                    "048 - Any other interlocutory Application",
+
+                  status:
+                    "Provisional - Review Required"
+
+                };
+
+
+          /*
+            STORE RESULT
+          */
+
+          processedDocuments.push({
+
+            originalName:
+              originalName,
+
+            identifiedAs:
+              identifiedAs ||
+              "Review Required",
+
+            filingInfo:
+              filingInfo,
+
             section:
-              "048 - Any other interlocutory Application",
+              mapping.section,
 
             status:
-              "Provisional - Review Required"
-          };
+              mapping.status,
+
+            uploadOrder:
+              i
+
+          });
+
+        }
 
 
-    processedDocuments.push({
+        /*
+          SORT BY FILING DATE
+          OLDEST → NEWEST
 
-      originalName:
-        originalName,
+          Documents without dates
+          go to the end.
+        */
 
-      identifiedAs:
-        identifiedAs || "Review Required",
+        processedDocuments.sort(
+          function (a, b) {
 
-      filingDate:
-        filingInfo
-          ? filingInfo.date
-          : null,
+            if (
+              !a.filingInfo &&
+              !b.filingInfo
+            ) {
 
-      filingTime:
-        filingInfo
-          ? filingInfo.time
-          : "",
+              return (
+                a.uploadOrder -
+                b.uploadOrder
+              );
 
-      section:
-        mapping.section,
-
-      status:
-        mapping.status
-
-    });
-
-  }
+            }
 
 
-  /* -----------------------------------------------
-     SORT BY FILING DATE
-     OLDEST → NEWEST
-  ----------------------------------------------- */
+            if (
+              !a.filingInfo
+            ) {
 
-  processedDocuments.sort(function (a, b) {
+              return 1;
 
-    if (!a.filingDate && !b.filingDate) {
-      return 0;
-    }
+            }
 
-    if (!a.filingDate) {
-      return 1;
-    }
 
-    if (!b.filingDate) {
-      return -1;
-    }
+            if (
+              !b.filingInfo
+            ) {
 
-    return a.filingDate.localeCompare(
-      b.filingDate
+              return -1;
+
+            }
+
+
+            const dateA =
+              a.filingInfo.date +
+              " " +
+              a.filingInfo.time;
+
+
+            const dateB =
+              b.filingInfo.date +
+              " " +
+              b.filingInfo.time;
+
+
+            return (
+              dateA.localeCompare(
+                dateB
+              )
+            );
+
+          }
+        );
+
+
+        /*
+          DISPLAY RESULTS
+        */
+
+        for (
+          let i = 0;
+          i < processedDocuments.length;
+          i++
+        ) {
+
+          const document =
+            processedDocuments[i];
+
+
+          const item =
+            document.createElement
+              ? document.createElement("div")
+              : document.createElement("div");
+
+        }
+
+
+        /*
+          IMPORTANT:
+          Use a different variable name
+          for the HTML element.
+        */
+
+        results.innerHTML =
+          "<h2>Processing Results</h2>";
+
+
+        for (
+          let i = 0;
+          i < processedDocuments.length;
+          i++
+        ) {
+
+          const doc =
+            processedDocuments[i];
+
+
+          const item =
+            document.createElement("div");
+
+
+          item.className =
+            "result-item";
+
+
+          let dateDisplay =
+            "⚠ Date not found";
+
+
+          let timeDisplay =
+            "Not found";
+
+
+          if (
+            doc.filingInfo
+          ) {
+
+            dateDisplay =
+              doc.filingInfo.date;
+
+            timeDisplay =
+              doc.filingInfo.time ||
+              "Not found";
+
+          }
+
+
+          const statusClass =
+            doc.status === "Confirmed"
+              ? "confirmed"
+              : "provisional";
+
+
+          item.innerHTML = `
+
+            <div class="result-name">
+
+              ${i + 1}.
+              ${doc.originalName}
+
+            </div>
+
+
+            <div class="result-status">
+
+              <strong>
+                Court Online type:
+              </strong>
+
+              ${doc.identifiedAs}
+
+
+              <br><br>
+
+
+              <strong>
+                Filing date:
+              </strong>
+
+              <span class="${
+                doc.filingInfo
+                  ? ""
+                  : "date-warning"
+              }">
+
+                ${dateDisplay}
+
+              </span>
+
+
+              <br>
+
+
+              <strong>
+                Filing time:
+              </strong>
+
+              ${timeDisplay}
+
+
+              <br><br>
+
+
+              <strong>
+                CaseLines section:
+              </strong>
+
+
+              <br>
+
+
+              ${doc.section}
+
+
+              <br><br>
+
+
+              <strong>
+                Mapping status:
+              </strong>
+
+
+              <span class="${statusClass}">
+
+                ${doc.status}
+
+              </span>
+
+            </div>
+
+          `;
+
+
+          results.appendChild(item);
+
+        }
+
+
+        /*
+          FINISHED
+        */
+
+        processButton.textContent =
+          "Documents Processed";
+
+
+        fileCount.textContent =
+          files.length +
+          " document(s) processed. " +
+          "Documents sorted oldest to newest.";
+
+      }
     );
 
-  });
 
+  </script>
 
-  /* -----------------------------------------------
-     DISPLAY RESULTS
-  ----------------------------------------------- */
-
-  results.innerHTML =
-    "<h2>Processing Results</h2>";
-
-
-  processedDocuments.forEach(function (document) {
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "result-item";
-
-
-    item.innerHTML = `
-
-      <div class="result-name">
-
-        ${document.originalName}
-
-      </div>
-
-      <div class="result-status">
-
-        <strong>Identified as:</strong>
-        ${document.identifiedAs}
-
-        <br><br>
-
-        <strong>Filing date:</strong>
-
-        ${
-          document.filingDate
-            ? document.filingDate
-            : "⚠ Date not found"
-        }
-
-        <br>
-
-        <strong>Filing time:</strong>
-
-        ${
-          document.filingTime ||
-          "Not found"
-        }
-
-        <br><br>
-
-        <strong>CaseLines section:</strong>
-
-        <br>
-
-        ${document.section}
-
-        <br><br>
-
-        <strong>Status:</strong>
-
-        ${document.status}
-
-      </div>
-
-    `;
-
-
-    results.appendChild(item);
-
-  });
-
-
-  processButton.textContent =
-    "Documents Processed";
-
-
-  fileCount.textContent =
-    files.length +
-    " document(s) processed. Please review the results.";
-
-});
-
-</script>
 </body>
+
 </html>
