@@ -1,33 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>CaseLines Bundler</title>
 
   <style>
-
-    .process-button {
-      margin-top: 30px;
-      padding: 16px 32px;
-      background: #2f3720;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-family: "Century Gothic", CenturyGothic, sans-serif;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .process-button:disabled {
-      background: #666269;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
     body {
       margin: 0;
       font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
@@ -83,6 +62,28 @@
       cursor: pointer;
     }
 
+    .upload-button:hover {
+      opacity: 0.9;
+    }
+
+    .process-button {
+      margin-top: 30px;
+      padding: 16px 32px;
+      background: #2f3720;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: "Century Gothic", CenturyGothic, sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .process-button:disabled {
+      background: #666269;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .privacy {
       margin-top: 20px;
       color: #666269;
@@ -112,12 +113,12 @@
       font-weight: bold;
     }
 
-    .results {
+    #results {
       margin-top: 40px;
       text-align: left;
     }
 
-    .results h2 {
+    #results h2 {
       text-align: center;
     }
 
@@ -143,34 +144,62 @@
     }
 
     .confirmed {
+      color: #2f3720;
       font-weight: bold;
     }
 
     .provisional {
+      color: #8a5a00;
       font-weight: bold;
     }
 
-    .date-warning {
+    .warning {
+      color: #9b1c1c;
       font-weight: bold;
     }
 
+    .folder-heading {
+      margin-top: 35px;
+      padding: 14px;
+      background: #d8d5d0;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #2f3720;
+    }
+
+    .folder-document {
+      padding: 12px 18px;
+      margin-top: 5px;
+      border-left: 3px solid #2f3720;
+      background: #fafafa;
+    }
+
+    .error-item {
+      padding: 18px;
+      margin-top: 10px;
+      border: 1px solid #c9aaaa;
+      border-radius: 8px;
+      background: #fff7f7;
+      color: #9b1c1c;
+    }
+
+    .progress {
+      margin-top: 15px;
+      color: #666269;
+      font-size: 14px;
+    }
   </style>
-
 </head>
-
 
 <body>
 
   <header>
-
     <h1>CaseLines Bundler</h1>
 
     <p class="tagline">
       Preparing Court Online documents for CaseLines.
     </p>
-
   </header>
-
 
   <main>
 
@@ -180,17 +209,13 @@
       Select all of the PDF documents you downloaded from Court Online.
     </p>
 
-
     <div class="upload-box">
 
       <h2>Drag and drop your PDFs here</h2>
 
       <p>or</p>
 
-      <label
-        for="file-upload"
-        class="upload-button"
-      >
+      <label for="file-upload" class="upload-button">
         Select Multiple PDF Files
       </label>
 
@@ -198,44 +223,35 @@
         id="file-upload"
         type="file"
         multiple
-        accept=".pdf"
+        accept=".pdf,application/pdf"
       >
 
     </div>
 
-
     <div id="file-list"></div>
-
 
     <button
       id="process-button"
       class="process-button"
       disabled
+      type="button"
     >
       Process Documents
     </button>
 
-
     <p id="file-count"></p>
 
-
-    <div id="results" class="results"></div>
-
+    <div id="results"></div>
 
     <p class="privacy">
       No login required • Your documents are not permanently retained
     </p>
 
-
     <div class="counter">
 
-      <div class="counter-number">
-        0
-      </div>
+      <div class="counter-number">0</div>
 
-      <p>
-        Bundles Prepared
-      </p>
+      <p>Bundles Prepared</p>
 
     </div>
 
@@ -243,273 +259,51 @@
 
 
   <!-- PDF.js -->
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-
   <!-- Tesseract OCR -->
-
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
   <script>
 
+    /* ============================================================
+       INITIAL SETUP
+    ============================================================ */
 
-    /* ==================================================
-       BASIC PAGE ELEMENTS
-    ================================================== */
+    const fileUpload = document.getElementById("file-upload");
+    const fileList = document.getElementById("file-list");
+    const processButton = document.getElementById("process-button");
+    const fileCount = document.getElementById("file-count");
+    const results = document.getElementById("results");
 
-    const fileUpload =
-      document.getElementById("file-upload");
-
-    const fileList =
-      document.getElementById("file-list");
-
-    const processButton =
-      document.getElementById("process-button");
-
-    const fileCount =
-      document.getElementById("file-count");
-
-    const results =
-      document.getElementById("results");
+    let selectedFiles = [];
 
 
-    /* ==================================================
-       DISPLAY SELECTED FILES
-    ================================================== */
+    /* ============================================================
+       PDF.JS WORKER
+    ============================================================ */
 
-    fileUpload.addEventListener(
-      "change",
-      function () {
+    if (typeof pdfjsLib !== "undefined") {
 
-        fileList.innerHTML = "";
-        results.innerHTML = "";
-
-        const files = fileUpload.files;
-
-
-        if (files.length > 0) {
-
-          processButton.disabled = false;
-
-          fileCount.textContent =
-            files.length +
-            " document(s) ready to process";
-
-        } else {
-
-          processButton.disabled = true;
-
-          fileCount.textContent = "";
-
-        }
-
-
-        for (
-          let i = 0;
-          i < files.length;
-          i++
-        ) {
-
-          const file =
-            document.createElement("div");
-
-          file.className = "file";
-
-          file.textContent =
-            "📄 " + files[i].name;
-
-          fileList.appendChild(file);
-
-        }
-
-      }
-    );
-
-
-    /* ==================================================
-       READ TEXT FROM NORMAL PDF
-    ================================================== */
-
-    async function readFirstPage(file) {
-
-      try {
-
-        const arrayBuffer =
-          await file.arrayBuffer();
-
-        const pdf =
-          await pdfjsLib.getDocument({
-            data: arrayBuffer
-          }).promise;
-
-        const page =
-          await pdf.getPage(1);
-
-        const textContent =
-          await page.getTextContent();
-
-        const text =
-          textContent.items
-            .map(item => item.str)
-            .join(" ");
-
-        return text;
-
-      } catch (error) {
-
-        console.error(
-          "PDF text extraction error:",
-          error
-        );
-
-        return "";
-
-      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
     }
 
 
-    /* ==================================================
-       OCR FALLBACK
-    ================================================== */
-
-    async function readFirstPageWithOCR(file) {
-
-      try {
-
-        const arrayBuffer =
-          await file.arrayBuffer();
-
-        const pdf =
-          await pdfjsLib.getDocument({
-            data: arrayBuffer
-          }).promise;
-
-        const page =
-          await pdf.getPage(1);
-
-        const viewport =
-          page.getViewport({
-            scale: 2
-          });
-
-        const canvas =
-          document.createElement("canvas");
-
-        const context =
-          canvas.getContext("2d");
-
-        canvas.width =
-          viewport.width;
-
-        canvas.height =
-          viewport.height;
-
-
-        await page.render({
-
-          canvasContext: context,
-
-          viewport: viewport
-
-        }).promise;
-
-
-        const result =
-          await Tesseract.recognize(
-            canvas,
-            "eng"
-          );
-
-
-        return result.data.text;
-
-      } catch (error) {
-
-        console.error(
-          "OCR error:",
-          error
-        );
-
-        return "";
-
-      }
-
-    }
-
-
-    /* ==================================================
-       EXTRACT COURT ONLINE FILING DATE
-    ================================================== */
-
-    function extractFilingDate(firstPageText) {
-
-      const datePattern =
-        /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
-
-
-      const match =
-        firstPageText.match(datePattern);
-
-
-      if (!match) {
-
-        return null;
-
-      }
-
-
-      const dateParts =
-        match[1].split("/");
-
-
-      const day =
-        dateParts[0].padStart(2, "0");
-
-
-      const month =
-        dateParts[1].padStart(2, "0");
-
-
-      const year =
-        dateParts[2];
-
-
-      return {
-
-        date:
-          `${year}-${month}-${day}`,
-
-        time:
-          match[2] || ""
-
-      };
-
-    }
-
-
-    /* ==================================================
+    /* ============================================================
        COURT ONLINE DOCUMENT TYPES
-    ================================================== */
+    ============================================================ */
 
     const courtOnlineTypes = [
 
       "Addendum",
-
-      "Affidavit",
-
       "Affidavit in support of Default Judgment",
-
       "Affidavit in support of Notice to Compel",
-
       "Agreement",
-
       "Amended Document",
-
       "Amended Notice",
-
       "Amicus Curiae Application",
 
       "Annexure 01",
@@ -530,480 +324,275 @@
       "Annexure 16 and More",
 
       "Answering Affidavit",
-
       "Appeal Record",
-
       "Applicant’s Chronology",
 
       "Application for Admission date",
-
       "Application for Appeal Date",
-
       "Application for Automatic Review",
-
       "Application for Condonation",
 
       "Application for Default Judgment in terms of Rule 31(5)",
-
       "Application for Default Judgment (Rule 31(2))",
 
       "Application for Eviction (ESTA)",
-
       "Application for Eviction (Labour Tenant)",
-
       "Application for Family Court Date",
-
       "Application for Insolvency Court Hearing Date",
-
       "Application for Joinder (Rule 10)",
-
       "Application for Opposed Motion Hearing Date",
-
       "Application for Opposed Summary Judgment Hearing date",
-
       "Application for Pre-Trial Date",
-
       "Application for Restitution",
-
       "Application for Summary Judgment",
-
       "Application for Taxation date",
-
       "Application for Trial (RAF) Default Judgment Date",
-
       "Application for Trial Date",
-
       "Application for Trial Interlocutory Hearing Date",
-
       "Application for Trial Settlement Roll Date",
-
       "Application for Unopposed Divorce Hearing Date",
-
       "Application for Unopposed Motion Hearing Date",
-
       "Application for Unopposed Motion Return Date (Rule Nisi)",
-
       "Application for Unopposed Summary Judgment Hearing date",
-
       "Application for Urgent Court Date",
-
       "Application for Variation",
-
       "Application to Strike Out",
 
       "Certificate",
-
       "Certificate of Balance",
-
       "Certificate of ownership and encumbrances",
-
       "Checklist",
-
       "Close of Pleadings",
-
       "Combined Summons",
-
       "Compliance Statement",
-
       "Conditions of Sale/ Rule 46",
-
       "Confirmatory Affidavit",
-
       "Consent Letter",
-
       "Contempt Application",
-
       "Correspondence",
-
       "Counter Claim",
-
       "Credit Agreement",
 
       "Declaration",
-
       "Declaratory as Labour Tenant Application",
-
       "Deeds",
-
       "Directive Compliance",
-
       "Discovery – Notice to Inspect Documents",
-
       "Discovery Affidavit",
-
       "Discovery Notices",
-
       "Draft Order",
 
       "Edictal Citation",
-
       "Estate documents",
-
       "Exception (Labour Court)",
-
       "Expert Notices",
-
       "Expert Reports",
 
       "Founding Affidavit",
-
       "Guarantee",
 
       "Heads of Argument",
 
       "Index",
-
       "Interlocutory Application",
-
       "Irregular step/irregular proceedings",
 
       "Joint Minutes/Pre-trial Minutes",
-
       "Judgment",
-
       "Judicial Pre-trial Notices",
 
       "Leave to Appeal",
-
       "Legal Practice Council Endorsement Letter",
-
       "List of Authorities",
-
       "LPC letter of no objection",
 
       "MC Appeal 01 J111",
-
       "MC Appeal Request",
-
       "Mediation Notice",
 
       "NCA Notices & Documents",
-
       "NCR Certificate",
 
       "Notice (Other)",
-
       "Notice i.t.o PIE Act S 4 (2)",
-
       "Notice i.t.o Rule 36(9)(a)",
-
       "Notice i.t.o Rule 36(9)(b)",
-
       "Notice in terms of Rule 16A",
-
       "Notice in terms of Rule 35(5)",
-
       "Notice of Intention to Oppose Taxation",
-
       "Notice of Acceptance",
-
       "Notice of Amendment",
-
       "Notice of Appointment as Attorneys of Record",
-
       "Notice of Bar",
-
       "Notice of Exception",
-
       "Notice of Intention to Defend",
-
       "Notice of Intention to Oppose",
-
       "Notice of Motion",
-
       "Notice of Motion with Hearing Date",
-
       "Notice of Opposition to Mediation",
-
       "Notice of Removal",
-
       "Notice of Sale",
-
       "Notice of Set-Down (Excluding Urgent Applications)",
-
       "Notice of Taxation (Set Down)",
-
       "Notice of Withdrawal as Attorney of Record",
-
       "Notice of Withdrawal of Action",
-
       "Notice to Abide",
-
       "Notice to Compel",
-
       "Notice to Withdraw",
 
       "Offer",
-
       "Other",
 
       "Particulars of Claim",
-
       "Petition",
-
       "Plea",
-
       "Pledge and Cession",
-
       "Point in limine",
-
       "Power of Attorney",
-
       "Practice Notes",
-
       "Proof of payment",
-
       "Proof of Service",
 
       "Re-issue of amendment initiating document",
-
       "Replication [Rule 25(1)]",
-
       "Replying Affidavit",
-
       "Report",
-
       "Request for further particulars",
-
       "Rescission Application",
-
       "Resolution",
-
       "Respondent’s Chronology",
-
       "Return of Service",
-
       "Review",
-
       "Rule 29(c) – Close of Pleadings",
-
       "Rule 37 (2) (b) and (7) Notice",
-
       "Rule 43 Application",
-
       "Rule 53 Record",
 
       "SARS final demand",
-
       "Schedule",
-
       "Search report",
-
       "Section 129",
-
       "Security for Costs",
-
       "Service of Foreign Process",
-
       "Settlement Agreement",
-
       "Settlement Submissions",
-
       "Special Plea",
-
       "Statement",
-
       "Statement of Claim",
-
       "Statement of Response",
-
       "Subpoena",
-
       "Substitute Service",
-
       "Substitute Service Application",
-
       "Supplementary Affidavit",
-
       "Supporting Documents",
-
       "Surety",
 
       "Tax Invoice",
-
       "Third Party Notice (Rule 13)",
-
       "Trace Report",
-
       "Trial Interlocutory Application",
 
       "Valuation",
 
       "Warrant of Arrest",
-
       "Warrant of Committal",
-
       "Writ of Attachment",
-
       "Writ of Ejectment",
+      "Writ of Execution",
 
-      "Writ of Execution"
-
+      /* Generic Affidavit deliberately last */
+      "Affidavit"
     ];
 
 
-    /* ==================================================
+    /* ============================================================
        CASELINES SECTIONS
-    ================================================== */
+    ============================================================ */
 
     const caseLinesSections = [
 
       "001 - Notice of Motion with Founding Affidavit",
-
       "002 - Simple Summons",
-
       "003 - Provisional Sentence Summons",
-
       "004 - Combined Summons",
-
       "005 - Return Of Service",
-
       "006 - Declaration",
-
       "007 - Notice of Intention to Oppose / Defend",
-
       "008 - Counter-Claim",
-
       "009 - Answering Affidavit",
-
       "010 - Replying Affidavit",
-
       "011 - Supplementary Affidavit",
-
       "012 - Confirmatory Affidavit",
-
       "013 - Particulars of Claim",
-
       "014 - Request for Further Particulars",
-
       "015 - Notice to Compel",
-
       "016 - Affidavit in Support of Notice to Compel",
-
       "017 - Subpoena",
-
       "018 - Notice of Bar",
-
       "019 - Notice of Removal/Application to Strike Out",
-
       "020 - Notice of Substitution",
-
       "021 - Application for Substituted Service",
-
       "022 - Notice of Withdrawal of Action",
-
       "023 - Warrant of Execution",
-
       "024 - Notice of Withdrawal as Attorneys of Records",
-
       "025 - Notice of Appointment as Attorneys of Records",
-
       "026 - Application for Summary Judgment",
-
       "027 - Rule 43 Application",
-
       "028 - Discovery Notices",
-
       "029 - Practice Notes",
-
       "030 - Plea or Special Plea",
-
       "031 - Notice of Exception",
-
       "032 - Expert Notices",
-
       "033 - Expert Reports",
-
       "034 - Notice of Amendment",
-
       "035 - Notice of Sale",
-
       "036 - Application for Edictal Citation",
-
       "037 - Notice of Inspection",
-
       "038 - Notice of Intention to Defend",
-
       "039 - Notice of Application to Strike Out",
-
       "040 - Notice of Sale in Execution",
-
       "041 - Provisional Set Down",
-
       "042 - Final Set Down/Notice of Set Down",
-
       "043 - Notice of Pre-Trial Conference",
-
       "044 - Notice of Set-Down",
-
       "045 - Joint Minutes",
-
       "046 - Application for Trial Date",
-
       "047 - Trial interlocutory Application",
-
       "048 - Any other interlocutory Application",
-
       "049 - Application for Admission As Amicus Curiae",
-
       "050 - Notice of Judicial Pre-Trial Conference",
-
       "051 - Third Party Notice (Rule 13)",
-
       "052 - Joinder of Parties (Rule 10)",
-
       "053 - Index and Pagination",
-
       "054 - Heads of Argument",
-
       "055 - List Authorities",
-
       "056 - Application of Default Judgement",
-
       "057 - Warrant of Execution",
-
       "058 - Affidavit in Support of Default Judgement",
-
       "059 - Notice in terms of Rule 31(5)",
-
       "060 - Confirmation of Deed of Cession",
-
       "061 - NCR Certificate of Plaintiff",
-
       "062 - NCR Proof of Renewal",
-
       "063 - Credit Agreement/Instalment Agreement",
-
       "064 - Statement",
-
       "065 - Section 129 & Proof of Post",
-
       "066 - Track and Trace",
-
       "067 - Certificate of Balance",
-
       "068 - Natis Document",
-
       "069 - Compliance Certificate",
-
       "070 - Updated NCR Certificates for Plaintiff",
-
       "071 - Confirmation of Registration Letters",
-
       "072 - Security for Costs",
-
       "073 - Notice of Taxation with Bill of Costs",
-
       "074 - Draft Court Order/Court Order",
-
       "075 - Leave to Appeal"
 
     ];
 
 
-    /* ==================================================
-       EXPLICIT MAPPING
-    ================================================== */
+    /* ============================================================
+       LEVEL 1 — EXPLICIT MAPPING
+       ============================================================ */
 
     const caseLinesMapping = {
 
@@ -1175,9 +764,13 @@
     };
 
 
-    /* ==================================================
-       SUPPLIED COMMON / AMBIGUOUS MAPPING
-    ================================================== */
+    /* ============================================================
+       LEVEL 2 — SUPPLIED COMMON / AMBIGUOUS MAPPING
+       
+       IMPORTANT:
+       This is deliberately checked AFTER the explicit mapping,
+       as requested.
+    ============================================================ */
 
     const suppliedCaseLinesMapping = {
 
@@ -1277,13 +870,13 @@
     };
 
 
-    /* ==================================================
+    /* ============================================================
        NORMALISE TEXT
-    ================================================== */
+    ============================================================ */
 
     function normaliseText(value) {
 
-      return value
+      return String(value || "")
         .toLowerCase()
         .replace(/[’‘]/g, "'")
         .replace(/[–—-]/g, " ")
@@ -1293,35 +886,27 @@
     }
 
 
-    /* ==================================================
+    /* ============================================================
        IDENTIFY COURT ONLINE DOCUMENT TYPE
-    ================================================== */
+    ============================================================ */
 
     function identifyCourtOnlineType(firstPageText) {
 
       const normalisedText =
         normaliseText(firstPageText);
 
-
       const sortedTypes =
         [...courtOnlineTypes].sort(
           (a, b) => b.length - a.length
         );
 
-
-      for (
-        const documentType
-        of sortedTypes
-      ) {
+      for (const documentType of sortedTypes) {
 
         const normalisedType =
           normaliseText(documentType);
 
-
         if (
-          normalisedText.includes(
-            normalisedType
-          )
+          normalisedText.includes(normalisedType)
         ) {
 
           return documentType;
@@ -1330,23 +915,98 @@
 
       }
 
-
       return null;
 
     }
 
 
-    /* ==================================================
-       PROVISIONAL CASELINES MATCH
-    ================================================== */
+    /* ============================================================
+       EXTRACT COURT ONLINE FILING DATE
+    ============================================================ */
 
-    function findProvisionalCaseLinesSection(
-      courtOnlineType
-    ) {
+    function extractFilingDate(firstPageText) {
+
+      if (!firstPageText) {
+        return null;
+      }
+
+      /*
+        Court Online example:
+
+        filed electronically by the Registrar on
+        24/6/2025 at 8:13:20 AM South African
+        Standard Time
+      */
+
+      const patterns = [
+
+        /filed\s+electronically\s+by\s+the\s+Registrar\s+on\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i,
+
+        /filed\s+electronically.*?\bon\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i,
+
+        /\bon\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i,
+
+        /\bdated\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i
+
+      ];
+
+      let match = null;
+
+      for (const pattern of patterns) {
+
+        match = firstPageText.match(pattern);
+
+        if (match) {
+          break;
+        }
+
+      }
+
+      if (!match) {
+        return null;
+      }
+
+      const dateParts =
+        match[1].split("/");
+
+      const day =
+        dateParts[0].padStart(2, "0");
+
+      const month =
+        dateParts[1].padStart(2, "0");
+
+      const year =
+        dateParts[2];
+
+      const date =
+        `${year}-${month}-${day}`;
+
+      return {
+
+        date: date,
+
+        time: match[2]
+          ? match[2].trim()
+          : ""
+
+      };
+
+    }
+
+
+    /* ============================================================
+       LEVEL 3 — PROVISIONAL MATCHING
+    ============================================================ */
+
+    function findProvisionalCaseLinesSection(courtOnlineType) {
 
       const type =
-        courtOnlineType.toLowerCase();
+        normaliseText(courtOnlineType);
 
+
+      /*
+        Applications without their own CaseLines section
+      */
 
       if (
         type.includes("application")
@@ -1357,6 +1017,10 @@
       }
 
 
+      /*
+        Notices
+      */
+
       if (
         type.includes("notice")
       ) {
@@ -1365,6 +1029,10 @@
 
       }
 
+
+      /*
+        Affidavits
+      */
 
       if (
         type.includes("affidavit")
@@ -1375,6 +1043,10 @@
       }
 
 
+      /*
+        Reports
+      */
+
       if (
         type.includes("report")
       ) {
@@ -1384,22 +1056,22 @@
       }
 
 
+      /*
+        General documents that resemble discovery
+      */
+
       if (
-        type.includes("summons")
+        type.includes("discovery")
       ) {
 
-        if (
-          type.includes("combined")
-        ) {
-
-          return "004 - Combined Summons";
-
-        }
-
-        return "002 - Simple Summons";
+        return "028 - Discovery Notices";
 
       }
 
+
+      /*
+        Pleadings
+      */
 
       if (
         type.includes("plea")
@@ -1410,71 +1082,34 @@
       }
 
 
-      if (
-        type.includes("statement")
-      ) {
-
-        return "064 - Statement";
-
-      }
-
-
       return null;
 
     }
 
 
-    /* ==================================================
-       GET CASELINES SECTION
-    ================================================== */
+    /* ============================================================
+       THREE-STAGE CASELINES MAPPING
+       
+       1. Explicit mapping
+       2. Supplied common mapping
+       3. Provisional matching
+    ============================================================ */
 
-    function getCaseLinesSection(
-      courtOnlineType
-    ) {
-
-      /*
-        STEP 1:
-        Supplied common/ambiguous mapping
-      */
-
-      if (
-        suppliedCaseLinesMapping[
-          courtOnlineType
-        ]
-      ) {
-
-        return {
-
-          section:
-            suppliedCaseLinesMapping[
-              courtOnlineType
-            ],
-
-          status:
-            "Provisional - Review Required"
-
-        };
-
-      }
-
+    function getCaseLinesSection(courtOnlineType) {
 
       /*
-        STEP 2:
+        LEVEL 1
         Explicit mapping
       */
 
       if (
-        caseLinesMapping[
-          courtOnlineType
-        ]
+        caseLinesMapping[courtOnlineType]
       ) {
 
         return {
 
           section:
-            caseLinesMapping[
-              courtOnlineType
-            ],
+            caseLinesMapping[courtOnlineType],
 
           status:
             "Confirmed"
@@ -1485,8 +1120,30 @@
 
 
       /*
-        STEP 3:
-        Provisional matching
+        LEVEL 2
+        Supplied common / ambiguous mapping
+      */
+
+      if (
+        suppliedCaseLinesMapping[courtOnlineType]
+      ) {
+
+        return {
+
+          section:
+            suppliedCaseLinesMapping[courtOnlineType],
+
+          status:
+            "Provisional - Review Required"
+
+        };
+
+      }
+
+
+      /*
+        LEVEL 3
+        Provisional intelligent matching
       */
 
       const provisional =
@@ -1511,7 +1168,6 @@
 
 
       /*
-        STEP 4:
         Nothing sensible found
       */
 
@@ -1528,21 +1184,211 @@
     }
 
 
-    /* ==================================================
+    /* ============================================================
+       READ FIRST PAGE OF NORMAL PDF
+    ============================================================ */
+
+    async function readFirstPage(file) {
+
+      try {
+
+        if (
+          typeof pdfjsLib === "undefined"
+        ) {
+
+          throw new Error(
+            "PDF.js failed to load."
+          );
+
+        }
+
+        const arrayBuffer =
+          await file.arrayBuffer();
+
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
+
+        const page =
+          await pdf.getPage(1);
+
+        const textContent =
+          await page.getTextContent();
+
+        const text =
+          textContent.items
+            .map(item => item.str)
+            .join(" ");
+
+        return text;
+
+      } catch (error) {
+
+        console.error(
+          "PDF text extraction error:",
+          error
+        );
+
+        return "";
+
+      }
+
+    }
+
+
+    /* ============================================================
+       OCR FALLBACK
+    ============================================================ */
+
+    async function readFirstPageWithOCR(file) {
+
+      try {
+
+        if (
+          typeof pdfjsLib === "undefined"
+        ) {
+
+          throw new Error(
+            "PDF.js failed to load."
+          );
+
+        }
+
+        if (
+          typeof Tesseract === "undefined"
+        ) {
+
+          throw new Error(
+            "Tesseract OCR failed to load."
+          );
+
+        }
+
+        const arrayBuffer =
+          await file.arrayBuffer();
+
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
+
+        const page =
+          await pdf.getPage(1);
+
+        const viewport =
+          page.getViewport({
+            scale: 2
+          });
+
+        const canvas =
+          document.createElement("canvas");
+
+        const context =
+          canvas.getContext("2d");
+
+        canvas.width =
+          viewport.width;
+
+        canvas.height =
+          viewport.height;
+
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+
+        const result =
+          await Tesseract.recognize(
+            canvas,
+            "eng"
+          );
+
+        return result.data.text || "";
+
+      } catch (error) {
+
+        console.error(
+          "OCR error:",
+          error
+        );
+
+        return "";
+
+      }
+
+    }
+
+
+    /* ============================================================
+       DISPLAY SELECTED FILES
+    ============================================================ */
+
+    fileUpload.addEventListener(
+      "change",
+      function () {
+
+        selectedFiles =
+          Array.from(fileUpload.files || []);
+
+        fileList.innerHTML = "";
+        results.innerHTML = "";
+
+        if (
+          selectedFiles.length > 0
+        ) {
+
+          processButton.disabled =
+            false;
+
+          fileCount.textContent =
+            selectedFiles.length +
+            " document(s) ready to process";
+
+        } else {
+
+          processButton.disabled =
+            true;
+
+          fileCount.textContent =
+            "";
+
+        }
+
+
+        selectedFiles.forEach(
+          function(file) {
+
+            const element =
+              document.createElement("div");
+
+            element.className =
+              "file";
+
+            element.textContent =
+              "📄 " + file.name;
+
+            fileList.appendChild(
+              element
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    /* ============================================================
        PROCESS DOCUMENTS
-    ================================================== */
+    ============================================================ */
 
     processButton.addEventListener(
       "click",
       async function () {
 
-        const files =
-          fileUpload.files;
-
-
         if (
-          !files ||
-          files.length === 0
+          selectedFiles.length === 0
         ) {
 
           return;
@@ -1550,12 +1396,11 @@
         }
 
 
-        processButton.textContent =
-          "Processing Documents...";
-
         processButton.disabled =
           true;
 
+        processButton.textContent =
+          "Processing Documents...";
 
         results.innerHTML =
           "<h2>Processing Results</h2>";
@@ -1565,141 +1410,179 @@
 
 
         /*
-          PROCESS EACH PDF
+          Process every document individually.
+          An error in one PDF does not stop the
+          rest of the batch.
         */
 
         for (
           let i = 0;
-          i < files.length;
+          i < selectedFiles.length;
           i++
         ) {
 
           const file =
-            files[i];
-
+            selectedFiles[i];
 
           const originalName =
             file.name;
 
 
-          /*
-            FIRST:
-            Try normal PDF text
-          */
+          fileCount.textContent =
+            "Processing document " +
+            (i + 1) +
+            " of " +
+            selectedFiles.length +
+            "...";
 
-          let firstPageText =
-            await readFirstPage(file);
+
+          try {
+
+            /*
+              First try normal PDF text extraction.
+            */
+
+            let firstPageText =
+              await readFirstPage(file);
 
 
-          /*
-            SECOND:
-            OCR fallback
-          */
+            /*
+              OCR fallback if the PDF has no
+              usable text.
+            */
 
-          if (
-            !firstPageText ||
-            firstPageText.trim().length < 10
-          ) {
+            if (
+              !firstPageText ||
+              firstPageText.trim().length < 10
+            ) {
 
-            firstPageText =
-              await readFirstPageWithOCR(file);
+              firstPageText =
+                await readFirstPageWithOCR(file);
+
+            }
+
+
+            /*
+              Identify Court Online document type.
+            */
+
+            const identifiedAs =
+              identifyCourtOnlineType(
+                firstPageText
+              );
+
+
+            /*
+              Extract filing date.
+            */
+
+            const filingInfo =
+              extractFilingDate(
+                firstPageText
+              );
+
+
+            /*
+              Mapping.
+            */
+
+            const mapping =
+              identifiedAs
+                ? getCaseLinesSection(
+                    identifiedAs
+                  )
+                : {
+
+                    section:
+                      "048 - Any other interlocutory Application",
+
+                    status:
+                      "Provisional - Review Required"
+
+                  };
+
+
+            processedDocuments.push({
+
+              file: file,
+
+              originalName:
+                originalName,
+
+              identifiedAs:
+                identifiedAs,
+
+              filingInfo:
+                filingInfo,
+
+              section:
+                mapping.section,
+
+              status:
+                mapping.status
+
+            });
+
+          } catch (error) {
+
+            console.error(
+              "Error processing " +
+              originalName,
+              error
+            );
+
+
+            processedDocuments.push({
+
+              file: file,
+
+              originalName:
+                originalName,
+
+              identifiedAs:
+                null,
+
+              filingInfo:
+                null,
+
+              section:
+                "048 - Any other interlocutory Application",
+
+              status:
+                "Review Required - Processing Error",
+
+              error:
+                error.message
+
+            });
 
           }
-
-
-          /*
-            IDENTIFY DOCUMENT TYPE
-          */
-
-          const identifiedAs =
-            identifyCourtOnlineType(
-              firstPageText
-            );
-
-
-          /*
-            EXTRACT FILING DATE
-          */
-
-          const filingInfo =
-            extractFilingDate(
-              firstPageText
-            );
-
-
-          /*
-            MAP TO CASELINES
-          */
-
-          const mapping =
-            identifiedAs
-              ? getCaseLinesSection(
-                  identifiedAs
-                )
-              : {
-
-                  section:
-                    "048 - Any other interlocutory Application",
-
-                  status:
-                    "Provisional - Review Required"
-
-                };
-
-
-          /*
-            STORE RESULT
-          */
-
-          processedDocuments.push({
-
-            originalName:
-              originalName,
-
-            identifiedAs:
-              identifiedAs ||
-              "Review Required",
-
-            filingInfo:
-              filingInfo,
-
-            section:
-              mapping.section,
-
-            status:
-              mapping.status,
-
-            uploadOrder:
-              i
-
-          });
 
         }
 
 
-        /*
-          SORT BY FILING DATE
-          OLDEST → NEWEST
-
-          Documents without dates
-          go to the end.
-        */
+        /* ========================================================
+           SORT OLDEST → NEWEST
+        ======================================================== */
 
         processedDocuments.sort(
-          function (a, b) {
+          function(a, b) {
+
+            /*
+              Documents with valid dates come first,
+              ascending from oldest to newest.
+
+              Undated documents are placed at the end.
+            */
 
             if (
               !a.filingInfo &&
               !b.filingInfo
             ) {
 
-              return (
-                a.uploadOrder -
-                b.uploadOrder
-              );
+              return 0;
 
             }
-
 
             if (
               !a.filingInfo
@@ -1709,7 +1592,6 @@
 
             }
 
-
             if (
               !b.filingInfo
             ) {
@@ -1718,211 +1600,426 @@
 
             }
 
-
             const dateA =
-              a.filingInfo.date +
-              " " +
-              a.filingInfo.time;
-
+              new Date(
+                a.filingInfo.date +
+                "T" +
+                (
+                  a.filingInfo.time
+                    ? convertTimeForSort(
+                        a.filingInfo.time
+                      )
+                    : "00:00:00"
+                )
+              );
 
             const dateB =
-              b.filingInfo.date +
-              " " +
-              b.filingInfo.time;
+              new Date(
+                b.filingInfo.date +
+                "T" +
+                (
+                  b.filingInfo.time
+                    ? convertTimeForSort(
+                        b.filingInfo.time
+                      )
+                    : "00:00:00"
+                )
+              );
+
+            return dateA - dateB;
+
+          }
+        );
 
 
-            return (
-              dateA.localeCompare(
-                dateB
-              )
+        /* ========================================================
+           DISPLAY SORTED DOCUMENT RESULTS
+        ======================================================== */
+
+        results.innerHTML =
+          "<h2>Processing Results</h2>";
+
+
+        processedDocuments.forEach(
+          function(document) {
+
+            const item =
+              document.createElement(
+                "div"
+              );
+
+            item.className =
+              "result-item";
+
+
+            let statusClass =
+              "provisional";
+
+            if (
+              document.status ===
+              "Confirmed"
+            ) {
+
+              statusClass =
+                "confirmed";
+
+            }
+
+
+            const identifiedText =
+              document.identifiedAs
+                ? document.identifiedAs
+                : "⚠ Document type not identified";
+
+
+            const dateText =
+              document.filingInfo
+                ? document.filingInfo.date
+                : "⚠ Date not found";
+
+
+            const timeText =
+              document.filingInfo
+                ? (
+                    document.filingInfo.time ||
+                    "Not found"
+                  )
+                : "Not found";
+
+
+            item.innerHTML = `
+
+              <div class="result-name">
+                ${escapeHtml(
+                  document.originalName
+                )}
+              </div>
+
+              <div class="result-status">
+
+                <strong>Identified as:</strong>
+                ${escapeHtml(
+                  identifiedText
+                )}
+
+                <br><br>
+
+                <strong>Filing date:</strong>
+                ${
+                  dateText.startsWith("⚠")
+                    ? `<span class="warning">${dateText}</span>`
+                    : escapeHtml(dateText)
+                }
+
+                <br>
+
+                <strong>Filing time:</strong>
+                ${escapeHtml(timeText)}
+
+                <br><br>
+
+                <strong>CaseLines section:</strong>
+                <br>
+                ${escapeHtml(
+                  document.section
+                )}
+
+                <br><br>
+
+                <strong>Status:</strong>
+                <span class="${statusClass}">
+                  ${escapeHtml(
+                    document.status
+                  )}
+                </span>
+
+              </div>
+
+            `;
+
+
+            results.appendChild(
+              item
             );
 
           }
         );
 
 
-        /*
-          DISPLAY RESULTS
-        */
+        /* ========================================================
+           DISPLAY CASELINES FOLDERS
+           ONLY FOLDERS CONTAINING DOCUMENTS
+        ======================================================== */
 
-        for (
-          let i = 0;
-          i < processedDocuments.length;
-          i++
-        ) {
-
-          const document =
-            processedDocuments[i];
+        const folders =
+          {};
 
 
-          const item =
-            document.createElement
-              ? document.createElement("div")
-              : document.createElement("div");
+        processedDocuments.forEach(
+          function(document) {
 
-        }
+            if (
+              !folders[document.section]
+            ) {
 
+              folders[document.section] =
+                [];
 
-        /*
-          IMPORTANT:
-          Use a different variable name
-          for the HTML element.
-        */
+            }
 
-        results.innerHTML =
-          "<h2>Processing Results</h2>";
-
-
-        for (
-          let i = 0;
-          i < processedDocuments.length;
-          i++
-        ) {
-
-          const doc =
-            processedDocuments[i];
-
-
-          const item =
-            document.createElement("div");
-
-
-          item.className =
-            "result-item";
-
-
-          let dateDisplay =
-            "⚠ Date not found";
-
-
-          let timeDisplay =
-            "Not found";
-
-
-          if (
-            doc.filingInfo
-          ) {
-
-            dateDisplay =
-              doc.filingInfo.date;
-
-            timeDisplay =
-              doc.filingInfo.time ||
-              "Not found";
+            folders[document.section].push(
+              document
+            );
 
           }
+        );
 
 
-          const statusClass =
-            doc.status === "Confirmed"
-              ? "confirmed"
-              : "provisional";
+        const folderHeading =
+          document.createElement("h2");
 
+        folderHeading.textContent =
+          "CaseLines Folder Order";
 
-          item.innerHTML = `
+        folderHeading.style.marginTop =
+          "50px";
 
-            <div class="result-name">
-
-              ${i + 1}.
-              ${doc.originalName}
-
-            </div>
-
-
-            <div class="result-status">
-
-              <strong>
-                Court Online type:
-              </strong>
-
-              ${doc.identifiedAs}
-
-
-              <br><br>
-
-
-              <strong>
-                Filing date:
-              </strong>
-
-              <span class="${
-                doc.filingInfo
-                  ? ""
-                  : "date-warning"
-              }">
-
-                ${dateDisplay}
-
-              </span>
-
-
-              <br>
-
-
-              <strong>
-                Filing time:
-              </strong>
-
-              ${timeDisplay}
-
-
-              <br><br>
-
-
-              <strong>
-                CaseLines section:
-              </strong>
-
-
-              <br>
-
-
-              ${doc.section}
-
-
-              <br><br>
-
-
-              <strong>
-                Mapping status:
-              </strong>
-
-
-              <span class="${statusClass}">
-
-                ${doc.status}
-
-              </span>
-
-            </div>
-
-          `;
-
-
-          results.appendChild(item);
-
-        }
+        results.appendChild(
+          folderHeading
+        );
 
 
         /*
-          FINISHED
+          CaseLines folders are shown in numerical
+          section order, but only if they contain
+          documents.
         */
+
+        const folderNames =
+          Object.keys(folders).sort(
+            function(a, b) {
+
+              const numberA =
+                parseInt(
+                  a.split(" - ")[0]
+                );
+
+              const numberB =
+                parseInt(
+                  b.split(" - ")[0]
+                );
+
+              return numberA - numberB;
+
+            }
+          );
+
+
+        folderNames.forEach(
+          function(folderName) {
+
+            const heading =
+              document.createElement(
+                "div"
+              );
+
+            heading.className =
+              "folder-heading";
+
+            heading.textContent =
+              folderName;
+
+            results.appendChild(
+              heading
+            );
+
+
+            /*
+              Documents inside each CaseLines
+              folder remain oldest → newest.
+            */
+
+            folders[folderName].forEach(
+              function(document) {
+
+                const documentElement =
+                  document.createElement(
+                    "div"
+                  );
+
+                documentElement.className =
+                  "folder-document";
+
+                const date =
+                  document.filingInfo
+                    ? document.filingInfo.date
+                    : "⚠ No filing date";
+
+                documentElement.innerHTML = `
+                  <strong>
+                    ${escapeHtml(
+                      document.originalName
+                    )}
+                  </strong>
+                  <br>
+                  <small>
+                    Filing date:
+                    ${escapeHtml(date)}
+                  </small>
+                `;
+
+                results.appendChild(
+                  documentElement
+                );
+
+              }
+            );
+
+          }
+        );
+
+
+        /* ========================================================
+           FINISHED
+        ======================================================== */
+
+        processButton.disabled =
+          false;
 
         processButton.textContent =
           "Documents Processed";
 
-
         fileCount.textContent =
-          files.length +
-          " document(s) processed. " +
-          "Documents sorted oldest to newest.";
+          selectedFiles.length +
+          " document(s) processed. Please review the results.";
 
       }
     );
 
 
+    /* ============================================================
+       TIME CONVERSION FOR SORTING
+    ============================================================ */
+
+    function convertTimeForSort(timeString) {
+
+      if (!timeString) {
+        return "00:00:00";
+      }
+
+      let clean =
+        timeString
+          .trim()
+          .toUpperCase();
+
+      const ampm =
+        clean.match(
+          /(AM|PM)$/
+        );
+
+      if (!ampm) {
+
+        if (
+          clean.split(":").length === 2
+        ) {
+
+          return clean + ":00";
+
+        }
+
+        return clean;
+
+      }
+
+      clean =
+        clean.replace(
+          /\s*(AM|PM)$/,
+          ""
+        );
+
+      const parts =
+        clean.split(":");
+
+      let hours =
+        parseInt(parts[0], 10);
+
+      const minutes =
+        parts[1] || "00";
+
+      const seconds =
+        parts[2] || "00";
+
+      if (
+        ampm[1] === "PM" &&
+        hours !== 12
+      ) {
+
+        hours += 12;
+
+      }
+
+      if (
+        ampm[1] === "AM" &&
+        hours === 12
+      ) {
+
+        hours = 0;
+
+      }
+
+      return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        minutes.padStart(2, "0") +
+        ":" +
+        seconds.padStart(2, "0")
+      );
+
+    }
+
+
+    /* ============================================================
+       HTML ESCAPING
+       Prevents PDF text from breaking the interface.
+    ============================================================ */
+
+    function escapeHtml(value) {
+
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* ============================================================
+       BASIC LIBRARY CHECK
+    ============================================================ */
+
+    window.addEventListener(
+      "load",
+      function() {
+
+        if (
+          typeof pdfjsLib === "undefined"
+        ) {
+
+          console.error(
+            "CaseLines Bundler: PDF.js did not load."
+          );
+
+          fileCount.textContent =
+            "⚠ PDF processing library could not be loaded. Please refresh the page.";
+
+        }
+
+      }
+    );
+
   </script>
 
 </body>
-
 </html>
