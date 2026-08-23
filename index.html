@@ -195,46 +195,61 @@
   </main>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
- <script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-  const fileUpload = document.getElementById("file-upload");
-  const fileList = document.getElementById("file-list");
-  const processButton = document.getElementById("process-button");
-  const fileCount = document.getElementById("file-count");
+<script>
 
-  fileUpload.addEventListener("change", function () {
-
-    fileList.innerHTML = "";
-
-    const files = fileUpload.files;
-
-    if (files.length > 0) {
-      processButton.disabled = false;
-
-      fileCount.textContent =
-        files.length + " document(s) ready to process";
-    } else {
-      processButton.disabled = true;
-      fileCount.textContent = "";
-    }
-
-    for (let i = 0; i < files.length; i++) {
-
-      const file = document.createElement("div");
-
-      file.className = "file";
-
-      file.textContent =
-        "📄 " + files[i].name;
-
-      fileList.appendChild(file);
-
-    }
-
-  });
-
+const fileUpload = document.getElementById("file-upload");
+const fileList = document.getElementById("file-list");
+const processButton = document.getElementById("process-button");
+const fileCount = document.getElementById("file-count");
 const results = document.getElementById("results");
+
+
+/* --------------------------------------------------
+   DISPLAY SELECTED FILES
+-------------------------------------------------- */
+
+fileUpload.addEventListener("change", function () {
+
+  fileList.innerHTML = "";
+  results.innerHTML = "";
+
+  const files = fileUpload.files;
+
+  if (files.length > 0) {
+
+    processButton.disabled = false;
+
+    fileCount.textContent =
+      files.length + " document(s) ready to process";
+
+  } else {
+
+    processButton.disabled = true;
+    fileCount.textContent = "";
+
+  }
+
+
+  for (let i = 0; i < files.length; i++) {
+
+    const file = document.createElement("div");
+
+    file.className = "file";
+
+    file.textContent = "📄 " + files[i].name;
+
+    fileList.appendChild(file);
+
+  }
+
+});
+
+
+/* --------------------------------------------------
+   READ TEXT FROM A NORMAL PDF
+-------------------------------------------------- */
 
 async function readFirstPage(file) {
 
@@ -258,13 +273,19 @@ async function readFirstPage(file) {
 
   } catch (error) {
 
-    console.error("Error reading PDF:", error);
+    console.error("PDF text extraction error:", error);
 
     return "";
 
   }
 
 }
+
+
+/* --------------------------------------------------
+   OCR FALLBACK FOR SCANNED PDFs
+-------------------------------------------------- */
+
 async function readFirstPageWithOCR(file) {
 
   try {
@@ -293,6 +314,7 @@ async function readFirstPageWithOCR(file) {
       viewport: viewport
     }).promise;
 
+
     const result = await Tesseract.recognize(
       canvas,
       "eng"
@@ -302,100 +324,171 @@ async function readFirstPageWithOCR(file) {
 
   } catch (error) {
 
-    console.error("OCR Error:", error);
+    console.error("OCR error:", error);
 
     return "";
 
   }
 
 }
+
+
+/* --------------------------------------------------
+   PROCESS DOCUMENTS
+-------------------------------------------------- */
+
 processButton.addEventListener("click", async function () {
 
   const files = fileUpload.files;
+
+  if (!files || files.length === 0) {
+
+    return;
+
+  }
 
   processButton.textContent = "Processing Documents...";
   processButton.disabled = true;
 
   results.innerHTML = "<h2>Processing Results</h2>";
 
-for (let i = 0; i < files.length; i++) {
 
-  const originalName = files[i].name;
+  for (let i = 0; i < files.length; i++) {
 
-let firstPageText = await readFirstPage(files[i]);
+    const originalName = files[i].name;
 
-if (!firstPageText || firstPageText.trim().length < 10) {
 
-  firstPageText = await readFirstPageWithOCR(files[i]);
+    /* Try normal PDF text extraction first */
 
-}
+    let firstPageText =
+      await readFirstPage(files[i]);
 
-  let identifiedAs = "Review Required";
 
-  const text = firstPageText.toLowerCase();
+    /* If the PDF has no usable text,
+       use OCR instead */
 
-  if (text.includes("combined summons")) {
-    identifiedAs = "Combined Summons";
+    if (
+      !firstPageText ||
+      firstPageText.trim().length < 10
+    ) {
+
+      firstPageText =
+        await readFirstPageWithOCR(files[i]);
+
+    }
+
+
+    /* Temporary document identification */
+
+    let identifiedAs = "Review Required";
+
+    const text =
+      firstPageText.toLowerCase();
+
+
+    if (text.includes("combined summons")) {
+
+      identifiedAs = "Combined Summons";
+
+    }
+
+    else if (text.includes("founding affidavit")) {
+
+      identifiedAs = "Founding Affidavit";
+
+    }
+
+    else if (text.includes("answering affidavit")) {
+
+      identifiedAs = "Answering Affidavit";
+
+    }
+
+    else if (text.includes("replying affidavit")) {
+
+      identifiedAs = "Replying Affidavit";
+
+    }
+
+    else if (text.includes("notice of motion")) {
+
+      identifiedAs = "Notice of Motion";
+
+    }
+
+    else if (text.includes("heads of argument")) {
+
+      identifiedAs = "Heads of Argument";
+
+    }
+
+    else if (text.includes("particulars of claim")) {
+
+      identifiedAs = "Particulars of Claim";
+
+    }
+
+    else if (
+      text.includes("notice of intention to defend")
+    ) {
+
+      identifiedAs =
+        "Notice of Intention to Defend";
+
+    }
+
+
+    /* Display result */
+
+    const item =
+      document.createElement("div");
+
+    item.className = "result-item";
+
+
+    item.innerHTML = `
+
+      <div class="result-name">
+        ${originalName}
+      </div>
+
+      <div class="result-status">
+
+        Identified as:
+        <strong>${identifiedAs}</strong>
+
+        <br><br>
+
+        <strong>
+          First page text detected:
+        </strong>
+
+        <br><br>
+
+        ${firstPageText
+          .substring(0, 500)
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")}
+
+      </div>
+
+    `;
+
+
+    results.appendChild(item);
+
   }
-  else if (text.includes("founding affidavit")) {
-    identifiedAs = "Founding Affidavit";
-  }
-  else if (text.includes("answering affidavit")) {
-    identifiedAs = "Answering Affidavit";
-  }
-  else if (text.includes("replying affidavit")) {
-    identifiedAs = "Replying Affidavit";
-  }
-  else if (text.includes("notice of motion")) {
-    identifiedAs = "Notice of Motion";
-  }
-  else if (text.includes("heads of argument")) {
-    identifiedAs = "Heads of Argument";
-  }
-  else if (text.includes("particulars of claim")) {
-    identifiedAs = "Particulars of Claim";
-  }
-  else if (text.includes("notice of intention to defend")) {
-    identifiedAs = "Notice of Intention to Defend";
-  }
 
-  const item = document.createElement("div");
 
-  item.className = "result-item";
-
-  item.innerHTML = `
-    <div class="result-name">
-      ${originalName}
-    </div>
-
-<div class="result-status">
-
-  Identified as:
-  <strong>${identifiedAs}</strong>
-
-  <br><br>
-
-  <strong>First page text detected:</strong>
-
-  <br>
-
-  ${firstPageText.substring(0, 500)}
-
-</div>
-  `;
-
-  results.appendChild(item);
-
-}
-
-  }
-
-  processButton.textContent = "Documents Processed";
+  processButton.textContent =
+    "Documents Processed";
 
   fileCount.textContent =
-    files.length + " document(s) processed. Please review the results.";
+    files.length +
+    " document(s) processed. Please review the results.";
 
 });
+
 
 </script>
 </body>
