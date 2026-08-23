@@ -726,6 +726,10 @@ const caseLinesSections = [
    COURT ONLINE → CASELINES MAPPING
 -------------------------------------------------- */
 
+/* --------------------------------------------------
+   EXPLICIT COURT ONLINE → CASELINES MAPPING
+-------------------------------------------------- */
+
 const caseLinesMapping = {
 
   "Notice of Motion":
@@ -895,14 +899,260 @@ const caseLinesMapping = {
 
 };
 
+/* --------------------------------------------------
+   SUPPLIED AMBIGUOUS / COMMON MAPPINGS
+-------------------------------------------------- */
+
+const suppliedCaseLinesMapping = {
+
+  "Annexure 01":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 02":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 03":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 04":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 05":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 06":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 07":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 08":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 09":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 10":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 11":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 12":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 13":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 14":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 15":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Annexure 16 and More":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Answering Affidavit":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Application for Admission date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Appeal Date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Automatic Review":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Application for Condonation":
+    "048 - Any other interlocutory Application",
+
+  "Application for Eviction (ESTA)":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Application for Summary Judgment":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Application for Taxation date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Unopposed Divorce Hearing Date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Unopposed Motion Hearing Date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Unopposed Motion Return Date (Rule Nisi)":
+    "048 - Any other interlocutory Application",
+
+  "Application for Unopposed Summary Judgment Hearing date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Urgent Court Date":
+    "048 - Any other interlocutory Application",
+
+  "Application for Variation":
+    "001 - Notice of Motion with Founding Affidavit",
+
+  "Application to Strike Out":
+    "048 - Any other interlocutory Application"
+
+};
+
 function getCaseLinesSection(courtOnlineType) {
+
+  /*
+    LEVEL 1
+    Supplied specific/common mapping
+  */
+
+  if (suppliedCaseLinesMapping[courtOnlineType]) {
+
+    return {
+
+      section:
+        suppliedCaseLinesMapping[courtOnlineType],
+
+      status:
+        "Provisional - Review Required"
+
+    };
+
+  }
+
+
+  /*
+    LEVEL 2
+    Explicit mapping
+  */
 
   if (caseLinesMapping[courtOnlineType]) {
 
     return {
-      section: caseLinesMapping[courtOnlineType],
-      status: "Confirmed"
+
+      section:
+        caseLinesMapping[courtOnlineType],
+
+      status:
+        "Confirmed"
+
     };
+
+  }
+
+
+  /*
+    LEVEL 3
+    Provisional matching
+  */
+
+  const provisional =
+    findProvisionalCaseLinesSection(
+      courtOnlineType
+    );
+
+
+  if (provisional) {
+
+    return {
+
+      section:
+        provisional,
+
+      status:
+        "Provisional - Review Required"
+
+    };
+
+  }
+
+
+  /*
+    LEVEL 4
+    Nothing sensible found
+  */
+
+  return {
+
+    section:
+      "",
+
+    status:
+      "Review Required"
+
+  };
+
+}
+
+function findProvisionalCaseLinesSection(
+  courtOnlineType
+) {
+
+  const type =
+    courtOnlineType.toLowerCase();
+
+
+  /*
+    Applications that do not have
+    a dedicated CaseLines section
+  */
+
+  if (
+    type.includes("application")
+  ) {
+
+    return "048 - Any other interlocutory Application";
+
+  }
+
+
+  /*
+    General notices
+  */
+
+  if (
+    type.includes("notice")
+  ) {
+
+    return "044 - Notice of Set-Down";
+
+  }
+
+
+  /*
+    Affidavits
+  */
+
+  if (
+    type.includes("affidavit")
+  ) {
+
+    return "001 - Notice of Motion with Founding Affidavit";
+
+  }
+
+
+  /*
+    Reports
+  */
+
+  if (
+    type.includes("report")
+  ) {
+
+    return "033 - Expert Reports";
+
+  }
+
+
+  /*
+    Anything else remains unresolved
+  */
+
+  return null;
+
+}
 
   }
 
