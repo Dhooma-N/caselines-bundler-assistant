@@ -268,7 +268,6 @@ const results =
 
 /*
    Tell PDF.js where its worker lives.
-   This prevents PDF processing from hanging in some browsers.
 */
 
 if (typeof pdfjsLib !== "undefined") {
@@ -880,25 +879,155 @@ function normaliseText(value) {
 
 /* =========================================================
    IDENTIFY COURT ONLINE DOCUMENT TYPE
+   IMPORTANT:
+   Court Online places the document type between tramlines
+   on the first page.
+
+   Example:
+
+   | Notice of Motion |
+
+   The function below looks specifically for text between
+   vertical bars/tramlines before considering anything else.
 ========================================================= */
 
 function identifyCourtOnlineType(firstPageText) {
 
+  if (!firstPageText) {
+    return null;
+  }
+
+
+  /*
+    First attempt:
+    Find text between vertical bars.
+
+    This handles examples such as:
+
+    | Notice of Motion |
+
+    | Affidavit |
+
+    | Application for Summary Judgment |
+
+  */
+
+  const tramlineMatches =
+    firstPageText.match(/\|([^|]{2,200})\|/g);
+
+
+  if (tramlineMatches) {
+
+    const sortedTypes =
+      [...courtOnlineTypes].sort(
+        (a, b) => b.length - a.length
+      );
+
+
+    for (const match of tramlineMatches) {
+
+      /*
+        Remove the tramlines.
+      */
+
+      const textBetweenTramlines =
+        match
+          .replace(/^\|/, "")
+          .replace(/\|$/, "")
+          .trim();
+
+
+      const normalisedTramlineText =
+        normaliseText(
+          textBetweenTramlines
+        );
+
+
+      /*
+        Look for an exact Court Online document type
+        inside the tramline text.
+      */
+
+      for (const documentType of sortedTypes) {
+
+        const normalisedType =
+          normaliseText(documentType);
+
+
+        if (
+          normalisedTramlineText ===
+          normalisedType
+        ) {
+
+          return documentType;
+
+        }
+
+      }
+
+
+      /*
+        Some PDF text extraction may put additional
+        whitespace or formatting inside the tramlines.
+
+        Therefore also allow the known document type
+        to occur within the tramline text.
+      */
+
+      for (const documentType of sortedTypes) {
+
+        const normalisedType =
+          normaliseText(documentType);
+
+
+        if (
+          normalisedTramlineText.includes(
+            normalisedType
+          )
+        ) {
+
+          return documentType;
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  /*
+    SECONDARY FALLBACK
+
+    If PDF.js does not preserve the tramlines as literal
+    "|" characters, we retain the old whole-page search.
+
+    This means the application will still work with PDFs
+    where the vertical tramlines are represented differently
+    by the PDF text layer.
+  */
+
   const normalisedText =
     normaliseText(firstPageText);
+
 
   const sortedTypes =
     [...courtOnlineTypes].sort(
       (a, b) => b.length - a.length
     );
 
+
   for (const documentType of sortedTypes) {
 
     const normalisedType =
       normaliseText(documentType);
 
+
     if (
-      normalisedText.includes(normalisedType)
+      normalisedText.includes(
+        normalisedType
+      )
     ) {
 
       return documentType;
@@ -906,6 +1035,7 @@ function identifyCourtOnlineType(firstPageText) {
     }
 
   }
+
 
   return null;
 
@@ -922,6 +1052,7 @@ function extractFilingDate(firstPageText) {
     return null;
   }
 
+
   /*
     Court Online example:
 
@@ -932,13 +1063,16 @@ function extractFilingDate(firstPageText) {
   const datePattern =
     /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
 
+
   const match =
     firstPageText.match(datePattern);
+
 
   if (!match) {
 
     /*
-      Fallback: look for a standalone date.
+      Fallback:
+      look for a standalone date.
     */
 
     const fallback =
@@ -946,32 +1080,43 @@ function extractFilingDate(firstPageText) {
         /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/
       );
 
+
     if (!fallback) {
       return null;
     }
 
+
     const parts =
       fallback[1].split("/");
 
+
     return {
+
       date:
         `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`,
+
       time: ""
+
     };
 
   }
 
+
   const dateParts =
     match[1].split("/");
+
 
   const day =
     dateParts[0].padStart(2, "0");
 
+
   const month =
     dateParts[1].padStart(2, "0");
 
+
   const year =
     dateParts[2];
+
 
   return {
 
@@ -997,21 +1142,26 @@ async function readFirstPage(file) {
     const arrayBuffer =
       await file.arrayBuffer();
 
+
     const pdf =
       await pdfjsLib.getDocument({
         data: arrayBuffer
       }).promise;
 
+
     const page =
       await pdf.getPage(1);
 
+
     const textContent =
       await page.getTextContent();
+
 
     const text =
       textContent.items
         .map(item => item.str)
         .join(" ");
+
 
     return text;
 
@@ -1022,6 +1172,7 @@ async function readFirstPage(file) {
       file.name,
       error
     );
+
 
     return "";
 
@@ -1038,6 +1189,7 @@ async function readFirstPageWithOCR(file) {
 
   const OCR_TIMEOUT = 30000;
 
+
   try {
 
     const ocrPromise = (async () => {
@@ -1045,41 +1197,51 @@ async function readFirstPageWithOCR(file) {
       const arrayBuffer =
         await file.arrayBuffer();
 
+
       const pdf =
         await pdfjsLib.getDocument({
           data: arrayBuffer
         }).promise;
 
+
       const page =
         await pdf.getPage(1);
+
 
       const viewport =
         page.getViewport({
           scale: 1.5
         });
 
+
       const canvas =
         document.createElement("canvas");
+
 
       const context =
         canvas.getContext("2d");
 
+
       canvas.width =
         Math.ceil(viewport.width);
 
+
       canvas.height =
         Math.ceil(viewport.height);
+
 
       await page.render({
         canvasContext: context,
         viewport: viewport
       }).promise;
 
+
       const result =
         await Tesseract.recognize(
           canvas,
           "eng"
         );
+
 
       return result.data.text || "";
 
@@ -1114,6 +1276,7 @@ async function readFirstPageWithOCR(file) {
       file.name,
       error
     );
+
 
     return "";
 
@@ -1183,6 +1346,7 @@ function getCaseLinesSection(courtOnlineType) {
     findProvisionalCaseLinesSection(
       courtOnlineType
     );
+
 
   if (provisional) {
 
@@ -1304,8 +1468,10 @@ fileUpload.addEventListener(
     fileList.innerHTML = "";
     results.innerHTML = "";
 
+
     const files =
       fileUpload.files;
+
 
     if (
       files &&
@@ -1315,6 +1481,11 @@ fileUpload.addEventListener(
       processButton.disabled =
         false;
 
+
+      processButton.textContent =
+        "Process Documents";
+
+
       fileCount.textContent =
         files.length +
         " document(s) ready to process";
@@ -1323,6 +1494,7 @@ fileUpload.addEventListener(
 
       processButton.disabled =
         true;
+
 
       fileCount.textContent =
         "";
@@ -1339,11 +1511,14 @@ fileUpload.addEventListener(
       const file =
         document.createElement("div");
 
+
       file.className =
         "file";
 
+
       file.textContent =
         "📄 " + files[i].name;
+
 
       fileList.appendChild(file);
 
@@ -1364,6 +1539,7 @@ processButton.addEventListener(
     const files =
       fileUpload.files;
 
+
     if (
       !files ||
       files.length === 0
@@ -1377,8 +1553,10 @@ processButton.addEventListener(
     processButton.disabled =
       true;
 
+
     processButton.textContent =
       "Processing Documents...";
+
 
     results.innerHTML =
       "<h2>Processing Results</h2>";
@@ -1421,11 +1599,14 @@ processButton.addEventListener(
       const processingMessage =
         document.createElement("div");
 
+
       processingMessage.className =
         "processing";
 
+
       processingMessage.textContent =
         `Processing document ${i + 1} of ${documents.length}: ${file.name}`;
+
 
       results.appendChild(
         processingMessage
@@ -1433,6 +1614,7 @@ processButton.addEventListener(
 
 
       let firstPageText = "";
+
 
       let extractionMethod =
         "PDF text";
@@ -1462,6 +1644,7 @@ processButton.addEventListener(
           extractionMethod =
             "OCR";
 
+
           firstPageText =
             await readFirstPageWithOCR(file);
 
@@ -1471,6 +1654,9 @@ processButton.addEventListener(
         /*
           STEP 3:
           Identify Court Online type.
+
+          The function first looks specifically
+          between the tramlines.
         */
 
         const identifiedAs =
@@ -1536,7 +1722,6 @@ processButton.addEventListener(
         */
 
         processingMessage.remove();
-
 
       } catch (error) {
 
@@ -1616,6 +1801,7 @@ processButton.addEventListener(
 
         }
 
+
         if (
           !a.filingInfo
         ) {
@@ -1623,6 +1809,7 @@ processButton.addEventListener(
           return 1;
 
         }
+
 
         if (
           !b.filingInfo
@@ -1639,6 +1826,7 @@ processButton.addEventListener(
               a.filingInfo.time || "00:00"
             }`
           );
+
 
         const dateB =
           new Date(
@@ -1657,10 +1845,6 @@ processButton.addEventListener(
     /* =====================================================
        DISPLAY FINAL RESULTS
     ===================================================== */
-
-    /*
-      Rebuild the results area.
-    */
 
     results.innerHTML =
       "<h2>Processing Results</h2>";
@@ -1683,12 +1867,14 @@ processButton.addEventListener(
       const item =
         document.createElement("div");
 
+
       item.className =
         "result-item";
 
 
       let statusClass =
         "confirmed";
+
 
       if (
         doc.mapping.status
@@ -1698,15 +1884,6 @@ processButton.addEventListener(
 
         statusClass =
           "provisional";
-
-      }
-
-
-      if (
-        !doc.filingInfo
-      ) {
-
-        item.innerHTML += "";
 
       }
 
@@ -1773,6 +1950,7 @@ processButton.addEventListener(
             doc.error
               ? `
                 <br><br>
+
                 <span class="warning">
                   ⚠ Processing warning:
                   ${escapeHtml(doc.error)}
@@ -1801,6 +1979,12 @@ processButton.addEventListener(
       ).length;
 
 
+    const missingTypes =
+      processedDocuments.filter(
+        doc => !doc.identifiedAs
+      ).length;
+
+
     processButton.textContent =
       "Documents Processed";
 
@@ -1815,6 +1999,16 @@ processButton.addEventListener(
 
       fileCount.textContent +=
         ` ⚠ ${missingDates} document(s) require date review.`;
+
+    }
+
+
+    if (
+      missingTypes > 0
+    ) {
+
+      fileCount.textContent +=
+        ` ⚠ ${missingTypes} document(s) require document-type review.`;
 
     }
 
