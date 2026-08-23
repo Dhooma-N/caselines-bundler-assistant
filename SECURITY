@@ -1,0 +1,173 @@
+# Security Policy — CaseLines Bundler
+
+**Copyright © 2026 Nabeel Dhooma. All rights reserved.**
+
+## 1. Purpose
+
+CaseLines Bundler is a browser-based Beta application intended to assist users in organising Court Online PDF documents into a CaseLines-ready structure.
+
+This security policy explains the security model of the application and how security vulnerabilities should be reported.
+
+## 2. Security Architecture
+
+CaseLines Bundler is designed as a client-side application.
+
+The intended processing model is:
+
+User's computer
+→ Web browser
+→ CaseLines Bundler JavaScript
+→ User's local files / browser memory
+→ Generated ZIP
+
+The application is designed so that PDF documents can be processed within the user's browser rather than uploaded to an application server.
+
+The deployed application is hosted using GitHub Pages and is accessed over HTTPS.
+
+## 3. Document Privacy
+
+The application is designed with local document processing in mind.
+
+The intended behaviour is that:
+
+- PDF documents selected by the user are processed within the user's browser.
+- The application does not intentionally upload the user's PDFs to a server operated by the developer.
+- The developer does not intentionally receive or retain the contents of uploaded documents through the application's normal operation.
+- Generated bundles are created for download in the user's browser.
+- The application does not provide server-side retrieval of a user's documents or generated bundle after the browser session is lost.
+
+### Important limitation
+
+Local processing is an application design objective and should not be interpreted as a guarantee that the user's computer, browser, operating system, browser extensions, network or other software is secure.
+
+Users should keep their operating system, browser and security software appropriately updated.
+
+The application should not be used to process documents where the user is not authorised to do so.
+
+## 4. Third-Party Components
+
+The application uses third-party software components, including:
+
+- PDF.js
+- Tesseract.js
+- JSZip
+
+These components are subject to their respective licences, terms and security considerations.
+
+The security of the overall application therefore depends in part upon the security of the versions of third-party components incorporated into or loaded by the application.
+
+Third-party licence notices should be maintained separately where appropriate.
+
+## 5. GitHub Repository Security
+
+The source repository is maintained using GitHub.
+
+The repository must not contain:
+
+- passwords;
+- API keys;
+- access tokens;
+- private keys;
+- confidential court documents;
+- personal information from actual matters;
+- other secrets or credentials.
+
+Where available, GitHub security features should be enabled, including:
+
+- Dependabot alerts;
+- Dependabot security updates;
+- secret scanning;
+- push protection; and
+- code scanning.
+
+Repository access should be restricted to trusted maintainers.
+
+Strong authentication, including multi-factor authentication, should be enabled on accounts with repository access.
+
+## 6. Public Source Code
+
+The application may be distributed from a public GitHub repository.
+
+Public availability of source code means that users may inspect and download publicly accessible HTML, JavaScript, CSS and other source files.
+
+Copyright and licence restrictions do not technically prevent someone from viewing or downloading publicly accessible source code.
+
+Accordingly, no secret, credential or security-sensitive private key should ever be embedded in client-side JavaScript.
+
+## 7. Security Reporting
+
+If you believe that you have discovered a security vulnerability in CaseLines Bundler, please report it privately to:
+
+**ned@live.co.za**
+
+Please do not publicly disclose a suspected vulnerability before the developer has had a reasonable opportunity to investigate it.
+
+Where possible, include:
+
+- a description of the vulnerability;
+- the affected page, feature or component;
+- steps required to reproduce the issue;
+- the potential security impact;
+- screenshots or other evidence where appropriate; and
+- the browser and operating system used.
+
+Please do not send confidential court documents or unnecessary personal information when reporting a vulnerability.
+
+If demonstrating an issue requires a document, use a synthetic, test or appropriately redacted document wherever possible.
+
+## 8. Security Response and Remediation
+
+Security reports will be reviewed by the developer.
+
+Depending upon the severity and reproducibility of the issue, remediation may include:
+
+- correcting application code;
+- updating third-party dependencies;
+- changing application configuration;
+- publishing an updated version;
+- temporarily disabling an affected feature; or
+- providing users with mitigation instructions.
+
+No specific response time or remediation timeframe is guaranteed while the application remains Beta software.
+
+## 9. Beta Status
+
+CaseLines Bundler is currently Beta software.
+
+The application may contain defects, implementation errors or security weaknesses that have not yet been identified.
+
+Beta status means that the application should not be assumed to have undergone:
+
+- formal penetration testing;
+- independent security auditing;
+- security certification; or
+- regulatory certification.
+
+Users should exercise appropriate caution when processing confidential, privileged or otherwise sensitive material.
+
+## 10. Legal and Professional Responsibility
+
+This security policy does not constitute:
+
+- legal advice;
+- a security certification;
+- an independent security audit;
+- a guarantee of confidentiality; or
+- a guarantee that the application is free from vulnerabilities.
+
+Users remain responsible for determining whether their use of CaseLines Bundler is appropriate for their documents and circumstances, including any applicable:
+
+- confidentiality requirements;
+- privilege requirements;
+- professional obligations;
+- court requirements;
+- organisational policies; or
+- legal requirements.
+
+## 11. Copyright and Intellectual Property
+
+CaseLines Bundler and its original source code, software architecture, interface design, document-processing logic, document classification logic, CaseLines mapping structure, filename-generation logic, documentation, text, layout and other original material are proprietary intellectual property of Nabeel Dhooma, except for independent third-party components.
+
+Nothing in this Security Policy grants permission to copy, modify, distribute, sublicense, commercially exploit or create derivative works from the original CaseLines Bundler software except as expressly permitted by the applicable licence.
+
+© 2026 Nabeel Dhooma. All rights reserved.
