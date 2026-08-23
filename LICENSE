@@ -1,0 +1,46 @@
+CASELINES BUNDLER
+PROPRIETARY SOFTWARE LICENCE
+
+Copyright © 2026 Nabeel Dhooma.
+All rights reserved.
+
+This software and its original source code, documentation,
+interface design, processing logic, classification logic,
+CaseLines mapping logic, filename-generation logic and other
+original materials are proprietary and are protected by
+applicable copyright and intellectual-property laws.
+
+No permission is granted to copy, reproduce, modify, adapt,
+publish, distribute, sublicense, sell, lease, reverse engineer,
+create derivative works from, or commercially exploit this
+software or any substantial part of it without prior written
+permission from the copyright owner.
+
+Authorised beta users may access and use the software solely
+for its intended testing and document-organisation purposes.
+
+Such access does not transfer ownership or grant any intellectual
+property rights in the software.
+
+All rights not expressly granted are reserved.
+
+THIRD-PARTY SOFTWARE
+
+This application uses third-party libraries, including PDF.js,
+Tesseract.js and JSZip.
+
+Those libraries are separate works and remain subject to their
+respective copyright notices and open-source licences.
+
+Nothing in this licence is intended to restrict rights granted
+under the applicable licences of those third-party components.
+
+PERMISSIONS
+
+Requests concerning permission to reproduce, modify, distribute
+or commercially use the original CaseLines Bundler software
+should be directed to:
+
+ned@live.co.za
+
+END OF LICENCE
