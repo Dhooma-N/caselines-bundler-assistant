@@ -314,7 +314,6 @@ async function readFirstPageWithOCR(file) {
       viewport: viewport
     }).promise;
 
-
     const result = await Tesseract.recognize(
       canvas,
       "eng"
@@ -331,22 +330,13 @@ async function readFirstPageWithOCR(file) {
   }
 
 }
+
+
 /* --------------------------------------------------
    EXTRACT COURT ONLINE FILING DATE
 -------------------------------------------------- */
 
 function extractFilingDate(firstPageText) {
-
-  /*
-    Court Online normally states the filing date
-    in the first paragraph under the tramlines.
-
-    Example:
-
-    filed electronically by the Registrar on
-    24/6/2025 at 8:13:20 AM South African
-    Standard Time
-  */
 
   const datePattern =
     /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
@@ -372,66 +362,19 @@ function extractFilingDate(firstPageText) {
   const year =
     dateParts[2];
 
-  const date =
-    `${year}-${month}-${day}`;
-
-  const time =
-    match[2] || "";
-
   return {
-    date: date,
-    time: time
+
+    date: `${year}-${month}-${day}`,
+
+    time: match[2] || ""
+
   };
 
 }
 
-/* --------------------------------------------------
-   PROCESS DOCUMENTS
--------------------------------------------------- */
-
-processButton.addEventListener("click", async function () {
-
-  const files = fileUpload.files;
-
-  if (!files || files.length === 0) {
-
-    return;
-
-  }
-
-  processButton.textContent = "Processing Documents...";
-  processButton.disabled = true;
-
-  results.innerHTML = "<h2>Processing Results</h2>";
-
-
-  for (let i = 0; i < files.length; i++) {
-
-    const originalName = files[i].name;
-
-
-    /* Try normal PDF text extraction first */
-
-    let firstPageText =
-      await readFirstPage(files[i]);
-
-
-    /* If the PDF has no usable text,
-       use OCR instead */
-
-    if (
-      !firstPageText ||
-      firstPageText.trim().length < 10
-    ) {
-
-      firstPageText =
-        await readFirstPageWithOCR(files[i]);
-
-    }
-
 
 /* --------------------------------------------------
-   COURT ONLINE DOCUMENT TYPE RECOGNITION
+   COURT ONLINE DOCUMENT TYPES
 -------------------------------------------------- */
 
 const courtOnlineTypes = [
@@ -638,6 +581,7 @@ const courtOnlineTypes = [
 
 ];
 
+
 /* --------------------------------------------------
    CASELINES SECTIONS
 -------------------------------------------------- */
@@ -722,12 +666,9 @@ const caseLinesSections = [
 
 ];
 
-/* --------------------------------------------------
-   COURT ONLINE → CASELINES MAPPING
--------------------------------------------------- */
 
 /* --------------------------------------------------
-   EXPLICIT COURT ONLINE → CASELINES MAPPING
+   EXPLICIT COURT ONLINE → CASELINES
 -------------------------------------------------- */
 
 const caseLinesMapping = {
@@ -899,59 +840,29 @@ const caseLinesMapping = {
 
 };
 
+
 /* --------------------------------------------------
    SUPPLIED AMBIGUOUS / COMMON MAPPINGS
 -------------------------------------------------- */
 
 const suppliedCaseLinesMapping = {
 
-  "Annexure 01":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 02":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 03":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 04":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 05":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 06":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 07":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 08":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 09":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 10":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 11":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 12":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 13":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 14":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 15":
-    "001 - Notice of Motion with Founding Affidavit",
-
-  "Annexure 16 and More":
-    "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 01": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 02": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 03": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 04": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 05": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 06": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 07": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 08": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 09": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 10": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 11": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 12": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 13": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 14": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 15": "001 - Notice of Motion with Founding Affidavit",
+  "Annexure 16 and More": "001 - Notice of Motion with Founding Affidavit",
 
   "Answering Affidavit":
     "001 - Notice of Motion with Founding Affidavit",
@@ -1000,167 +911,53 @@ const suppliedCaseLinesMapping = {
 
 };
 
+
+/* --------------------------------------------------
+   CASELINES MAPPING LOGIC
+-------------------------------------------------- */
+
 function getCaseLinesSection(courtOnlineType) {
 
-  /*
-    LEVEL 1
-    Supplied specific/common mapping
-  */
+  /* FIRST: supplied ambiguous mappings */
 
   if (suppliedCaseLinesMapping[courtOnlineType]) {
 
     return {
-
-      section:
-        suppliedCaseLinesMapping[courtOnlineType],
-
-      status:
-        "Provisional - Review Required"
-
+      section: suppliedCaseLinesMapping[courtOnlineType],
+      status: "Provisional - Review Required"
     };
 
   }
 
 
-  /*
-    LEVEL 2
-    Explicit mapping
-  */
+  /* SECOND: explicit mappings */
 
   if (caseLinesMapping[courtOnlineType]) {
 
     return {
-
-      section:
-        caseLinesMapping[courtOnlineType],
-
-      status:
-        "Confirmed"
-
+      section: caseLinesMapping[courtOnlineType],
+      status: "Confirmed"
     };
 
   }
 
 
-  /*
-    LEVEL 3
-    Provisional matching
-  */
+  /* THIRD: provisional matching */
 
   const provisional =
     findProvisionalCaseLinesSection(
       courtOnlineType
     );
 
-
   if (provisional) {
 
     return {
-
-      section:
-        provisional,
-
-      status:
-        "Provisional - Review Required"
-
+      section: provisional,
+      status: "Provisional - Review Required"
     };
 
   }
 
-
-  /*
-    LEVEL 4
-    Nothing sensible found
-  */
-
-  return {
-
-    section:
-      "",
-
-    status:
-      "Review Required"
-
-  };
-
-}
-
-function findProvisionalCaseLinesSection(
-  courtOnlineType
-) {
-
-  const type =
-    courtOnlineType.toLowerCase();
-
-
-  /*
-    Applications that do not have
-    a dedicated CaseLines section
-  */
-
-  if (
-    type.includes("application")
-  ) {
-
-    return "048 - Any other interlocutory Application";
-
-  }
-
-
-  /*
-    General notices
-  */
-
-  if (
-    type.includes("notice")
-  ) {
-
-    return "044 - Notice of Set-Down";
-
-  }
-
-
-  /*
-    Affidavits
-  */
-
-  if (
-    type.includes("affidavit")
-  ) {
-
-    return "001 - Notice of Motion with Founding Affidavit";
-
-  }
-
-
-  /*
-    Reports
-  */
-
-  if (
-    type.includes("report")
-  ) {
-
-    return "033 - Expert Reports";
-
-  }
-
-
-  /*
-    Anything else remains unresolved
-  */
-
-  return null;
-
-}
-
-  }
-
-  /*
-    If there is no exact mapping yet,
-    provisionally use the most likely
-    section based on the document type.
-  */
 
   return {
     section: "048 - Any other interlocutory Application",
@@ -1169,7 +966,49 @@ function findProvisionalCaseLinesSection(
 
 }
 
-/* Normalise text for comparison */
+
+function findProvisionalCaseLinesSection(courtOnlineType) {
+
+  const type =
+    courtOnlineType.toLowerCase();
+
+
+  if (type.includes("application")) {
+
+    return "048 - Any other interlocutory Application";
+
+  }
+
+
+  if (type.includes("notice")) {
+
+    return "044 - Notice of Set-Down";
+
+  }
+
+
+  if (type.includes("affidavit")) {
+
+    return "001 - Notice of Motion with Founding Affidavit";
+
+  }
+
+
+  if (type.includes("report")) {
+
+    return "033 - Expert Reports";
+
+  }
+
+
+  return null;
+
+}
+
+
+/* --------------------------------------------------
+   NORMALISE TEXT
+-------------------------------------------------- */
 
 function normaliseText(value) {
 
@@ -1183,20 +1022,14 @@ function normaliseText(value) {
 }
 
 
-/* Find a Court Online document type */
+/* --------------------------------------------------
+   IDENTIFY COURT ONLINE TYPE
+-------------------------------------------------- */
 
 function identifyCourtOnlineType(firstPageText) {
 
   const normalisedText =
     normaliseText(firstPageText);
-
-
-  /*
-    Longest names are checked first.
-    This prevents "Affidavit" from being
-    selected before "Founding Affidavit",
-    for example.
-  */
 
   const sortedTypes =
     [...courtOnlineTypes].sort(
@@ -1208,7 +1041,6 @@ function identifyCourtOnlineType(firstPageText) {
 
     const normalisedType =
       normaliseText(documentType);
-
 
     if (
       normalisedText.includes(normalisedType)
@@ -1226,73 +1058,201 @@ function identifyCourtOnlineType(firstPageText) {
 }
 
 
-/* Identify the Court Online document type */
+/* --------------------------------------------------
+   PROCESS DOCUMENTS
+-------------------------------------------------- */
 
-const identifiedAs =
-  identifyCourtOnlineType(firstPageText);
+processButton.addEventListener("click", async function () {
 
-const filingInfo =
-  extractFilingDate(firstPageText);
+  const files = fileUpload.files;
 
-const mapping =
-  identifiedAs
-    ? getCaseLinesSection(identifiedAs)
-    : {
-        section: "048 - Any other interlocutory Application",
-        status: "Provisional - Review Required"
-      };
+  if (!files || files.length === 0) {
+
+    return;
+
+  }
 
 
-/* Display result */
+  processButton.textContent =
+    "Processing Documents...";
 
-const item =
+  processButton.disabled = true;
+
+  results.innerHTML =
+    "<h2>Processing Results</h2>";
+
+
+  const processedDocuments = [];
+
+
+  /* -----------------------------------------------
+     READ AND CLASSIFY EVERY DOCUMENT
+  ----------------------------------------------- */
+
+  for (let i = 0; i < files.length; i++) {
+
+    const originalName =
+      files[i].name;
+
+
+    let firstPageText =
+      await readFirstPage(files[i]);
+
+
+    if (
+      !firstPageText ||
+      firstPageText.trim().length < 10
+    ) {
+
+      firstPageText =
+        await readFirstPageWithOCR(files[i]);
+
+    }
+
+
+    /* Identify Court Online type */
+
+    const identifiedAs =
+      identifyCourtOnlineType(firstPageText);
+
+
+    /* Extract filing date */
+
+    const filingInfo =
+      extractFilingDate(firstPageText);
+
+
+    /* Determine CaseLines destination */
+
+    const mapping =
+      identifiedAs
+        ? getCaseLinesSection(identifiedAs)
+        : {
+            section:
+              "048 - Any other interlocutory Application",
+
+            status:
+              "Provisional - Review Required"
+          };
+
+
+    processedDocuments.push({
+
+      originalName:
+        originalName,
+
+      identifiedAs:
+        identifiedAs || "Review Required",
+
+      filingDate:
+        filingInfo
+          ? filingInfo.date
+          : null,
+
+      filingTime:
+        filingInfo
+          ? filingInfo.time
+          : "",
+
+      section:
+        mapping.section,
+
+      status:
+        mapping.status
+
+    });
+
+  }
+
+
+  /* -----------------------------------------------
+     SORT BY FILING DATE
+     OLDEST → NEWEST
+  ----------------------------------------------- */
+
+  processedDocuments.sort(function (a, b) {
+
+    if (!a.filingDate && !b.filingDate) {
+      return 0;
+    }
+
+    if (!a.filingDate) {
+      return 1;
+    }
+
+    if (!b.filingDate) {
+      return -1;
+    }
+
+    return a.filingDate.localeCompare(
+      b.filingDate
+    );
+
+  });
+
+
+  /* -----------------------------------------------
+     DISPLAY RESULTS
+  ----------------------------------------------- */
+
+  results.innerHTML =
+    "<h2>Processing Results</h2>";
+
+
+  processedDocuments.forEach(function (document) {
+
+    const item =
       document.createElement("div");
 
-    item.className = "result-item";
+    item.className =
+      "result-item";
 
 
     item.innerHTML = `
 
       <div class="result-name">
-        ${originalName}
+
+        ${document.originalName}
+
       </div>
 
       <div class="result-status">
 
-        Identified as:
-        <strong>${identifiedAs}</strong>
+        <strong>Identified as:</strong>
+        ${document.identifiedAs}
 
         <br><br>
 
         <strong>Filing date:</strong>
 
-        ${filingInfo
-          ? filingInfo.date
-          : "⚠ Date not found"}
+        ${
+          document.filingDate
+            ? document.filingDate
+            : "⚠ Date not found"
+        }
 
         <br>
 
         <strong>Filing time:</strong>
 
-        ${filingInfo
-          ? filingInfo.time || "Not found"
-          : "Not found"}
+        ${
+          document.filingTime ||
+          "Not found"
+        }
 
         <br><br>
 
-<br><br>
+        <strong>CaseLines section:</strong>
 
-<strong>CaseLines section:</strong>
+        <br>
 
-<br>
+        ${document.section}
 
-${mapping.section}
+        <br><br>
 
-<br><br>
+        <strong>Status:</strong>
 
-<strong>Status:</strong>
-
-${mapping.status}
+        ${document.status}
 
       </div>
 
@@ -1301,18 +1261,18 @@ ${mapping.status}
 
     results.appendChild(item);
 
-  }
+  });
 
 
   processButton.textContent =
     "Documents Processed";
+
 
   fileCount.textContent =
     files.length +
     " document(s) processed. Please review the results.";
 
 });
-
 
 </script>
 </body>
