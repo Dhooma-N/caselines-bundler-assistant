@@ -174,12 +174,15 @@
 <body>
 
 <header>
+
   <h1>CaseLines Bundler</h1>
 
   <p class="tagline">
     Preparing Court Online documents for CaseLines.
   </p>
+
 </header>
+
 
 <main>
 
@@ -189,13 +192,17 @@
     Select all of the PDF documents you downloaded from Court Online.
   </p>
 
+
   <div class="upload-box">
 
     <h2>Drag and drop your PDFs here</h2>
 
     <p>or</p>
 
-    <label for="file-upload" class="upload-button">
+    <label
+      for="file-upload"
+      class="upload-button"
+    >
       Select Multiple PDF Files
     </label>
 
@@ -208,7 +215,9 @@
 
   </div>
 
+
   <div id="file-list"></div>
+
 
   <button
     id="process-button"
@@ -218,33 +227,49 @@
     Process Documents
   </button>
 
+
   <p id="file-count"></p>
 
+
   <div id="results" class="results"></div>
+
 
   <p class="privacy">
     No login required • Your documents are not permanently retained
   </p>
 
+
   <div class="counter">
 
-    <div class="counter-number">0</div>
+    <div class="counter-number">
+      0
+    </div>
 
-    <p>Bundles Prepared</p>
+    <p>
+      Bundles Prepared
+    </p>
 
   </div>
 
 </main>
 
 
-<!-- PDF.JS -->
+<!-- =====================================================
+     PDF.JS
+===================================================== -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-<!-- TESSERACT -->
+
+<!-- =====================================================
+     TESSERACT OCR
+===================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
 <script>
+
 
 /* =========================================================
    BASIC SETUP
@@ -266,11 +291,13 @@ const results =
   document.getElementById("results");
 
 
-/*
-   Tell PDF.js where its worker lives.
-*/
+/* =========================================================
+   PDF.JS WORKER
+========================================================= */
 
-if (typeof pdfjsLib !== "undefined") {
+if (
+  typeof pdfjsLib !== "undefined"
+) {
 
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -879,17 +906,23 @@ function normaliseText(value) {
 
 /* =========================================================
    IDENTIFY COURT ONLINE DOCUMENT TYPE
-   IMPORTANT:
-   Court Online places the document type between tramlines
-   on the first page.
-
-   Example:
-
-   | Notice of Motion |
-
-   The function below looks specifically for text between
-   vertical bars/tramlines before considering anything else.
 ========================================================= */
+
+/*
+  Court Online places the document type between
+  tramlines on the first page.
+
+  Example:
+
+  | Notice of Motion |
+
+  The program first searches specifically between
+  the tramlines.
+
+  If PDF.js does not preserve the tramlines as
+  literal "|" characters, a fallback whole-page
+  search is used.
+*/
 
 function identifyCourtOnlineType(firstPageText) {
 
@@ -899,21 +932,14 @@ function identifyCourtOnlineType(firstPageText) {
 
 
   /*
-    First attempt:
-    Find text between vertical bars.
-
-    This handles examples such as:
-
-    | Notice of Motion |
-
-    | Affidavit |
-
-    | Application for Summary Judgment |
-
+    FIRST METHOD:
+    Look specifically between vertical tramlines.
   */
 
   const tramlineMatches =
-    firstPageText.match(/\|([^|]{2,200})\|/g);
+    firstPageText.match(
+      /\|([^|]{2,200})\|/g
+    );
 
 
   if (tramlineMatches) {
@@ -924,11 +950,9 @@ function identifyCourtOnlineType(firstPageText) {
       );
 
 
-    for (const match of tramlineMatches) {
-
-      /*
-        Remove the tramlines.
-      */
+    for (
+      const match of tramlineMatches
+    ) {
 
       const textBetweenTramlines =
         match
@@ -944,14 +968,17 @@ function identifyCourtOnlineType(firstPageText) {
 
 
       /*
-        Look for an exact Court Online document type
-        inside the tramline text.
+        First try an exact match.
       */
 
-      for (const documentType of sortedTypes) {
+      for (
+        const documentType of sortedTypes
+      ) {
 
         const normalisedType =
-          normaliseText(documentType);
+          normaliseText(
+            documentType
+          );
 
 
         if (
@@ -967,17 +994,18 @@ function identifyCourtOnlineType(firstPageText) {
 
 
       /*
-        Some PDF text extraction may put additional
-        whitespace or formatting inside the tramlines.
-
-        Therefore also allow the known document type
-        to occur within the tramline text.
+        Then allow additional text
+        inside the tramlines.
       */
 
-      for (const documentType of sortedTypes) {
+      for (
+        const documentType of sortedTypes
+      ) {
 
         const normalisedType =
-          normaliseText(documentType);
+          normaliseText(
+            documentType
+          );
 
 
         if (
@@ -998,18 +1026,17 @@ function identifyCourtOnlineType(firstPageText) {
 
 
   /*
-    SECONDARY FALLBACK
+    FALLBACK:
+    Search the entire first page.
 
-    If PDF.js does not preserve the tramlines as literal
-    "|" characters, we retain the old whole-page search.
-
-    This means the application will still work with PDFs
-    where the vertical tramlines are represented differently
-    by the PDF text layer.
+    This is retained because some PDFs may not expose
+    the tramlines as literal "|" characters.
   */
 
   const normalisedText =
-    normaliseText(firstPageText);
+    normaliseText(
+      firstPageText
+    );
 
 
   const sortedTypes =
@@ -1018,10 +1045,14 @@ function identifyCourtOnlineType(firstPageText) {
     );
 
 
-  for (const documentType of sortedTypes) {
+  for (
+    const documentType of sortedTypes
+  ) {
 
     const normalisedType =
-      normaliseText(documentType);
+      normaliseText(
+        documentType
+      );
 
 
     if (
@@ -1065,7 +1096,9 @@ function extractFilingDate(firstPageText) {
 
 
   const match =
-    firstPageText.match(datePattern);
+    firstPageText.match(
+      datePattern
+    );
 
 
   if (!match) {
@@ -1095,7 +1128,8 @@ function extractFilingDate(firstPageText) {
       date:
         `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`,
 
-      time: ""
+      time:
+        ""
 
     };
 
@@ -1187,81 +1221,96 @@ async function readFirstPage(file) {
 
 async function readFirstPageWithOCR(file) {
 
-  const OCR_TIMEOUT = 30000;
+  const OCR_TIMEOUT =
+    30000;
 
 
   try {
 
-    const ocrPromise = (async () => {
+    const ocrPromise =
+      (async () => {
 
-      const arrayBuffer =
-        await file.arrayBuffer();
+        const arrayBuffer =
+          await file.arrayBuffer();
 
 
-      const pdf =
-        await pdfjsLib.getDocument({
-          data: arrayBuffer
+        const pdf =
+          await pdfjsLib.getDocument({
+            data: arrayBuffer
+          }).promise;
+
+
+        const page =
+          await pdf.getPage(1);
+
+
+        const viewport =
+          page.getViewport({
+            scale: 1.5
+          });
+
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+
+        const context =
+          canvas.getContext(
+            "2d"
+          );
+
+
+        canvas.width =
+          Math.ceil(
+            viewport.width
+          );
+
+
+        canvas.height =
+          Math.ceil(
+            viewport.height
+          );
+
+
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
         }).promise;
 
 
-      const page =
-        await pdf.getPage(1);
+        const result =
+          await Tesseract.recognize(
+            canvas,
+            "eng"
+          );
 
 
-      const viewport =
-        page.getViewport({
-          scale: 1.5
-        });
+        return result.data.text || "";
 
-
-      const canvas =
-        document.createElement("canvas");
-
-
-      const context =
-        canvas.getContext("2d");
-
-
-      canvas.width =
-        Math.ceil(viewport.width);
-
-
-      canvas.height =
-        Math.ceil(viewport.height);
-
-
-      await page.render({
-        canvasContext: context,
-        viewport: viewport
-      }).promise;
-
-
-      const result =
-        await Tesseract.recognize(
-          canvas,
-          "eng"
-        );
-
-
-      return result.data.text || "";
-
-    })();
+      })();
 
 
     const timeoutPromise =
-      new Promise((_, reject) => {
+      new Promise(
+        (_, reject) => {
 
-        setTimeout(() => {
+          setTimeout(
+            () => {
 
-          reject(
-            new Error(
-              "OCR timed out after 30 seconds."
-            )
+              reject(
+                new Error(
+                  "OCR timed out after 30 seconds."
+                )
+              );
+
+            },
+            OCR_TIMEOUT
           );
 
-        }, OCR_TIMEOUT);
-
-      });
+        }
+      );
 
 
     return await Promise.race([
@@ -1289,7 +1338,9 @@ async function readFirstPageWithOCR(file) {
    CASELINES MAPPING
 ========================================================= */
 
-function getCaseLinesSection(courtOnlineType) {
+function getCaseLinesSection(
+  courtOnlineType
+) {
 
   /*
     LEVEL 1:
@@ -1390,12 +1441,15 @@ function findProvisionalCaseLinesSection(
 ) {
 
   const type =
-    normaliseText(courtOnlineType);
+    normaliseText(
+      courtOnlineType
+    );
 
 
   if (!type) {
 
-    return "048 - Any other interlocutory Application";
+    return
+      "048 - Any other interlocutory Application";
 
   }
 
@@ -1408,7 +1462,8 @@ function findProvisionalCaseLinesSection(
     type.includes("application")
   ) {
 
-    return "048 - Any other interlocutory Application";
+    return
+      "048 - Any other interlocutory Application";
 
   }
 
@@ -1421,7 +1476,8 @@ function findProvisionalCaseLinesSection(
     type.includes("affidavit")
   ) {
 
-    return "001 - Notice of Motion with Founding Affidavit";
+    return
+      "001 - Notice of Motion with Founding Affidavit";
 
   }
 
@@ -1434,7 +1490,8 @@ function findProvisionalCaseLinesSection(
     type.includes("report")
   ) {
 
-    return "033 - Expert Reports";
+    return
+      "033 - Expert Reports";
 
   }
 
@@ -1447,12 +1504,222 @@ function findProvisionalCaseLinesSection(
     type.includes("notice")
   ) {
 
-    return "044 - Notice of Set-Down";
+    return
+      "044 - Notice of Set-Down";
 
   }
 
 
-  return "048 - Any other interlocutory Application";
+  return
+    "048 - Any other interlocutory Application";
+
+}
+
+
+/* =========================================================
+   CHRONOLOGICAL SORTING
+========================================================= */
+
+/*
+  IMPORTANT:
+
+  Court Online times are commonly displayed as:
+
+  9:40:31 AM
+  1:04:57 PM
+  3:23:22 PM
+
+  JavaScript's Date parser should NOT be relied upon
+  to interpret these.
+
+  This function explicitly converts the date and time
+  into a numerical value.
+
+  Example:
+
+  24/06/2025 8:13:20 AM
+
+  becomes:
+
+  20250624081320
+
+  This guarantees proper chronological sorting.
+*/
+
+function getChronologicalValue(
+  filingInfo
+) {
+
+  /*
+    No filing information.
+  */
+
+  if (
+    !filingInfo ||
+    !filingInfo.date
+  ) {
+
+    return null;
+
+  }
+
+
+  /*
+    Date format:
+
+    YYYY-MM-DD
+  */
+
+  const dateParts =
+    filingInfo.date.split("-");
+
+
+  if (
+    dateParts.length !== 3
+  ) {
+
+    return null;
+
+  }
+
+
+  const year =
+    parseInt(
+      dateParts[0],
+      10
+    );
+
+
+  const month =
+    parseInt(
+      dateParts[1],
+      10
+    );
+
+
+  const day =
+    parseInt(
+      dateParts[2],
+      10
+    );
+
+
+  /*
+    Default time:
+
+    00:00:00
+
+    This means that a document with a date but
+    no time will be placed at the beginning
+    of that particular date.
+  */
+
+  let hour = 0;
+
+  let minute = 0;
+
+  let second = 0;
+
+
+  /*
+    Process the filing time if available.
+  */
+
+  if (
+    filingInfo.time
+  ) {
+
+    const timeMatch =
+      filingInfo.time.match(
+        /(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i
+      );
+
+
+    if (
+      timeMatch
+    ) {
+
+      hour =
+        parseInt(
+          timeMatch[1],
+          10
+        );
+
+
+      minute =
+        parseInt(
+          timeMatch[2],
+          10
+        );
+
+
+      second =
+        parseInt(
+          timeMatch[3] || "0",
+          10
+        );
+
+
+      const meridiem =
+        (
+          timeMatch[4] || ""
+        ).toUpperCase();
+
+
+      /*
+        Convert 12-hour time to 24-hour time.
+
+        12:00 AM = 00:00
+        12:00 PM = 12:00
+        1:00 PM  = 13:00
+        2:00 PM  = 14:00
+      */
+
+      if (
+        meridiem === "AM"
+      ) {
+
+        if (
+          hour === 12
+        ) {
+
+          hour = 0;
+
+        }
+
+      } else if (
+        meridiem === "PM"
+      ) {
+
+        if (
+          hour !== 12
+        ) {
+
+          hour += 12;
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  /*
+    Build one sortable number.
+
+    YYYYMMDDHHMMSS
+  */
+
+  return (
+    year * 10000000000 +
+    month * 100000000 +
+    day * 1000000 +
+    hour * 10000 +
+    minute * 100 +
+    second
+  );
 
 }
 
@@ -1465,8 +1732,11 @@ fileUpload.addEventListener(
   "change",
   function () {
 
-    fileList.innerHTML = "";
-    results.innerHTML = "";
+    fileList.innerHTML =
+      "";
+
+    results.innerHTML =
+      "";
 
 
     const files =
@@ -1509,7 +1779,9 @@ fileUpload.addEventListener(
     ) {
 
       const file =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       file.className =
@@ -1517,10 +1789,13 @@ fileUpload.addEventListener(
 
 
       file.textContent =
-        "📄 " + files[i].name;
+        "📄 " +
+        files[i].name;
 
 
-      fileList.appendChild(file);
+      fileList.appendChild(
+        file
+      );
 
     }
 
@@ -1563,20 +1838,29 @@ processButton.addEventListener(
 
 
     /*
-      Convert FileList into an ordinary array.
+      Convert FileList into ordinary array.
     */
 
     const documents =
-      Array.from(files);
+      Array.from(
+        files
+      );
+
+
+    /*
+      Store processed documents.
+    */
+
+    const processedDocuments =
+      [];
 
 
     /*
       Process every PDF independently.
-      A failure in one PDF cannot stop the loop.
+
+      A failure in one PDF cannot stop
+      the remaining documents.
     */
-
-    const processedDocuments = [];
-
 
     for (
       let i = 0;
@@ -1597,7 +1881,9 @@ processButton.addEventListener(
       */
 
       const processingMessage =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       processingMessage.className =
@@ -1613,7 +1899,8 @@ processButton.addEventListener(
       );
 
 
-      let firstPageText = "";
+      let firstPageText =
+        "";
 
 
       let extractionMethod =
@@ -1628,7 +1915,9 @@ processButton.addEventListener(
         */
 
         firstPageText =
-          await readFirstPage(file);
+          await readFirstPage(
+            file
+          );
 
 
         /*
@@ -1646,7 +1935,9 @@ processButton.addEventListener(
 
 
           firstPageText =
-            await readFirstPageWithOCR(file);
+            await readFirstPageWithOCR(
+              file
+            );
 
         }
 
@@ -1655,8 +1946,8 @@ processButton.addEventListener(
           STEP 3:
           Identify Court Online type.
 
-          The function first looks specifically
-          between the tramlines.
+          The function first looks between
+          the tramlines.
         */
 
         const identifiedAs =
@@ -1667,7 +1958,7 @@ processButton.addEventListener(
 
         /*
           STEP 4:
-          Extract filing date.
+          Extract filing date and time.
         */
 
         const filingInfo =
@@ -1678,11 +1969,7 @@ processButton.addEventListener(
 
         /*
           STEP 5:
-          Mapping hierarchy:
-
-          1. Explicit
-          2. Supplied ambiguous
-          3. Provisional
+          Determine CaseLines section.
         */
 
         const mapping =
@@ -1718,7 +2005,7 @@ processButton.addEventListener(
 
 
         /*
-          Remove temporary processing message.
+          Remove temporary message.
         */
 
         processingMessage.remove();
@@ -1734,7 +2021,8 @@ processButton.addEventListener(
 
         /*
           IMPORTANT:
-          Do not allow one PDF to stop
+
+          One failed document does not stop
           the entire batch.
         */
 
@@ -1782,19 +2070,34 @@ processButton.addEventListener(
 
 
     /* =====================================================
-       SORT BY FILING DATE — OLDEST TO NEWEST
+       SORT DOCUMENTS
+       OLDEST TO NEWEST
     ===================================================== */
 
     processedDocuments.sort(
       function (a, b) {
 
+        const valueA =
+          getChronologicalValue(
+            a.filingInfo
+          );
+
+
+        const valueB =
+          getChronologicalValue(
+            b.filingInfo
+          );
+
+
         /*
-          Documents without a date go last.
+          Both have no date.
+
+          Keep their existing order.
         */
 
         if (
-          !a.filingInfo &&
-          !b.filingInfo
+          valueA === null &&
+          valueB === null
         ) {
 
           return 0;
@@ -1802,8 +2105,14 @@ processButton.addEventListener(
         }
 
 
+        /*
+          A has no date.
+
+          Put A after B.
+        */
+
         if (
-          !a.filingInfo
+          valueA === null
         ) {
 
           return 1;
@@ -1811,8 +2120,14 @@ processButton.addEventListener(
         }
 
 
+        /*
+          B has no date.
+
+          Put B after A.
+        */
+
         if (
-          !b.filingInfo
+          valueB === null
         ) {
 
           return -1;
@@ -1820,23 +2135,11 @@ processButton.addEventListener(
         }
 
 
-        const dateA =
-          new Date(
-            `${a.filingInfo.date}T${
-              a.filingInfo.time || "00:00"
-            }`
-          );
+        /*
+          Oldest first.
+        */
 
-
-        const dateB =
-          new Date(
-            `${b.filingInfo.date}T${
-              b.filingInfo.time || "00:00"
-            }`
-          );
-
-
-        return dateA - dateB;
+        return valueA - valueB;
 
       }
     );
@@ -1851,7 +2154,8 @@ processButton.addEventListener(
 
 
     /*
-      Only display actual processed documents.
+      Display processed documents
+      in their chronological order.
     */
 
     for (
@@ -1865,12 +2169,18 @@ processButton.addEventListener(
 
 
       const item =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       item.className =
         "result-item";
 
+
+      /*
+        Determine status colour.
+      */
 
       let statusClass =
         "confirmed";
@@ -1879,7 +2189,9 @@ processButton.addEventListener(
       if (
         doc.mapping.status
           .toLowerCase()
-          .includes("provisional")
+          .includes(
+            "provisional"
+          )
       ) {
 
         statusClass =
@@ -1888,47 +2200,72 @@ processButton.addEventListener(
       }
 
 
+      /*
+        Display result.
+      */
+
       item.innerHTML = `
 
         <div class="result-name">
-          ${escapeHtml(doc.originalName)}
+          ${escapeHtml(
+            doc.originalName
+          )}
         </div>
 
         <div class="result-status">
 
-          <strong>Identified as:</strong>
+          <strong>
+            Identified as:
+          </strong>
 
           ${
             doc.identifiedAs
-              ? escapeHtml(doc.identifiedAs)
+
+              ? escapeHtml(
+                  doc.identifiedAs
+                )
+
               : '<span class="warning">⚠ Document type not identified</span>'
           }
 
           <br><br>
 
-          <strong>Filing date:</strong>
+          <strong>
+            Filing date:
+          </strong>
 
           ${
             doc.filingInfo
-              ? escapeHtml(doc.filingInfo.date)
+
+              ? escapeHtml(
+                  doc.filingInfo.date
+                )
+
               : '<span class="warning">⚠ Date not found</span>'
           }
 
           <br>
 
-          <strong>Filing time:</strong>
+          <strong>
+            Filing time:
+          </strong>
 
           ${
             doc.filingInfo
+
               ? escapeHtml(
-                  doc.filingInfo.time || "Not found"
+                  doc.filingInfo.time ||
+                  "Not found"
                 )
+
               : "Not found"
           }
 
           <br><br>
 
-          <strong>CaseLines section:</strong>
+          <strong>
+            CaseLines section:
+          </strong>
 
           <br>
 
@@ -1938,7 +2275,9 @@ processButton.addEventListener(
 
           <br><br>
 
-          <strong>Status:</strong>
+          <strong>
+            Status:
+          </strong>
 
           <span class="${statusClass}">
             ${escapeHtml(
@@ -1948,14 +2287,22 @@ processButton.addEventListener(
 
           ${
             doc.error
+
               ? `
+
                 <br><br>
 
                 <span class="warning">
+
                   ⚠ Processing warning:
-                  ${escapeHtml(doc.error)}
+                  ${escapeHtml(
+                    doc.error
+                  )}
+
                 </span>
+
               `
+
               : ""
           }
 
@@ -1964,7 +2311,9 @@ processButton.addEventListener(
       `;
 
 
-      results.appendChild(item);
+      results.appendChild(
+        item
+      );
 
     }
 
@@ -1975,13 +2324,15 @@ processButton.addEventListener(
 
     const missingDates =
       processedDocuments.filter(
-        doc => !doc.filingInfo
+        doc =>
+          !doc.filingInfo
       ).length;
 
 
     const missingTypes =
       processedDocuments.filter(
-        doc => !doc.identifiedAs
+        doc =>
+          !doc.identifiedAs
       ).length;
 
 
@@ -2022,12 +2373,29 @@ processButton.addEventListener(
 
 function escapeHtml(value) {
 
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
