@@ -1210,6 +1210,44 @@ const downloadBundleButton =
 const acknowledgementCheckbox =
   document.getElementById("acknowledgement-checkbox");
 
+/* =========================================================
+   BETA ACKNOWLEDGEMENT — RETURN TO PROCESS BUTTON
+========================================================= */
+
+acknowledgementCheckbox.addEventListener(
+  "change",
+  function () {
+
+    if (
+      !acknowledgementCheckbox.checked
+    ) {
+
+      return;
+
+    }
+
+
+    requestAnimationFrame(
+      function () {
+
+        setTimeout(
+          function () {
+
+            processButton.scrollIntoView({
+              behavior: "smooth",
+              block: "center"
+            });
+
+          },
+          100
+        );
+
+      }
+    );
+
+  }
+);
+
 
 /* =========================================================
    PDF.JS WORKER
