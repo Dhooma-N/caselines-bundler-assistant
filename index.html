@@ -331,7 +331,59 @@ async function readFirstPageWithOCR(file) {
   }
 
 }
+/* --------------------------------------------------
+   EXTRACT COURT ONLINE FILING DATE
+-------------------------------------------------- */
 
+function extractFilingDate(firstPageText) {
+
+  /*
+    Court Online normally states the filing date
+    in the first paragraph under the tramlines.
+
+    Example:
+
+    filed electronically by the Registrar on
+    24/6/2025 at 8:13:20 AM South African
+    Standard Time
+  */
+
+  const datePattern =
+    /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
+
+  const match =
+    firstPageText.match(datePattern);
+
+  if (!match) {
+
+    return null;
+
+  }
+
+  const dateParts =
+    match[1].split("/");
+
+  const day =
+    dateParts[0].padStart(2, "0");
+
+  const month =
+    dateParts[1].padStart(2, "0");
+
+  const year =
+    dateParts[2];
+
+  const date =
+    `${year}-${month}-${day}`;
+
+  const time =
+    match[2] || "";
+
+  return {
+    date: date,
+    time: time
+  };
+
+}
 
 /* --------------------------------------------------
    PROCESS DOCUMENTS
@@ -648,6 +700,9 @@ function identifyCourtOnlineType(firstPageText) {
 
 const identifiedAs =
   identifyCourtOnlineType(firstPageText);
+    
+const filingInfo =
+  extractFilingDate(firstPageText);
 
 
 /* Display result */
@@ -668,6 +723,22 @@ const item =
 
         Identified as:
         <strong>${identifiedAs}</strong>
+
+        <br><br>
+
+        <strong>Filing date:</strong>
+
+        ${filingInfo
+          ? filingInfo.date
+          : "⚠ Date not found"}
+
+        <br>
+
+        <strong>Filing time:</strong>
+
+        ${filingInfo
+          ? filingInfo.time || "Not found"
+          : "Not found"}
 
         <br><br>
 
