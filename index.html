@@ -378,69 +378,281 @@ processButton.addEventListener("click", async function () {
     }
 
 
-    /* Temporary document identification */
+/* --------------------------------------------------
+   COURT ONLINE DOCUMENT TYPE RECOGNITION
+-------------------------------------------------- */
 
-    let identifiedAs = "Review Required";
+const courtOnlineTypes = [
 
-    const text =
-      firstPageText.toLowerCase();
+  "Addendum",
+  "Affidavit",
+  "Affidavit in support of Default Judgment",
+  "Affidavit in support of Notice to Compel",
+  "Agreement",
+  "Amended Document",
+  "Amended Notice",
+  "Amicus Curiae Application",
+
+  "Annexure 01",
+  "Annexure 02",
+  "Annexure 03",
+  "Annexure 04",
+  "Annexure 05",
+  "Annexure 06",
+  "Annexure 07",
+  "Annexure 08",
+  "Annexure 09",
+  "Annexure 10",
+  "Annexure 11",
+  "Annexure 12",
+  "Annexure 13",
+  "Annexure 14",
+  "Annexure 15",
+  "Annexure 16 and More",
+
+  "Answering Affidavit",
+  "Appeal Record",
+  "Applicant’s Chronology",
+  "Application for Admission date",
+  "Application for Appeal Date",
+  "Application for Automatic Review",
+  "Application for Condonation",
+  "Application for Default Judgment in terms of Rule 31(5)",
+  "Application for Default Judgment (Rule 31(2))",
+  "Application for Eviction (ESTA)",
+  "Application for Eviction (Labour Tenant)",
+  "Application for Family Court Date",
+  "Application for Insolvency Court Hearing Date",
+  "Application for Joinder (Rule 10)",
+  "Application for Opposed Motion Hearing Date",
+  "Application for Opposed Summary Judgment Hearing date",
+  "Application for Pre-Trial Date",
+  "Application for Restitution",
+  "Application for Summary Judgment",
+  "Application for Taxation date",
+  "Application for Trial (RAF) Default Judgment Date",
+  "Application for Trial Date",
+  "Application for Trial Interlocutory Hearing Date",
+  "Application for Trial Settlement Roll Date",
+  "Application for Unopposed Divorce Hearing Date",
+  "Application for Unopposed Motion Hearing Date",
+  "Application for Unopposed Motion Return Date (Rule Nisi)",
+  "Application for Unopposed Summary Judgment Hearing date",
+  "Application for Urgent Court Date",
+  "Application for Variation",
+  "Application to Strike Out",
+
+  "Certificate",
+  "Certificate of Balance",
+  "Certificate of ownership and encumbrances",
+  "Checklist",
+  "Close of Pleadings",
+  "Combined Summons",
+  "Compliance Statement",
+  "Conditions of Sale/ Rule 46",
+  "Confirmatory Affidavit",
+  "Consent Letter",
+  "Contempt Application",
+  "Correspondence",
+  "Counter Claim",
+  "Credit Agreement",
+
+  "Declaration",
+  "Declaratory as Labour Tenant Application",
+  "Deeds",
+  "Directive Compliance",
+  "Discovery – Notice to Inspect Documents",
+  "Discovery Affidavit",
+  "Discovery Notices",
+  "Draft Order",
+
+  "Edictal Citation",
+  "Estate documents",
+  "Exception (Labour Court)",
+  "Expert Notices",
+  "Expert Reports",
+
+  "Founding Affidavit",
+  "Guarantee",
+
+  "Heads of Argument",
+
+  "Index",
+  "Interlocutory Application",
+  "Irregular step/irregular proceedings",
+
+  "Joint Minutes/Pre-trial Minutes",
+  "Judgment",
+  "Judicial Pre-trial Notices",
+
+  "Leave to Appeal",
+  "Legal Practice Council Endorsement Letter",
+  "List of Authorities",
+  "LPC letter of no objection",
+
+  "MC Appeal 01 J111",
+  "MC Appeal Request",
+  "Mediation Notice",
+
+  "NCA Notices & Documents",
+  "NCR Certificate",
+
+  "Notice (Other)",
+  "Notice i.t.o PIE Act S 4 (2)",
+  "Notice i.t.o Rule 36(9)(a)",
+  "Notice i.t.o Rule 36(9)(b)",
+  "Notice in terms of Rule 16A",
+  "Notice in terms of Rule 35(5)",
+  "Notice of Intention to Oppose Taxation",
+  "Notice of Acceptance",
+  "Notice of Amendment",
+  "Notice of Appointment as Attorneys of Record",
+  "Notice of Bar",
+  "Notice of Exception",
+  "Notice of Intention to Defend",
+  "Notice of Intention to Oppose",
+  "Notice of Motion",
+  "Notice of Motion with Hearing Date",
+  "Notice of Opposition to Mediation",
+  "Notice of Removal",
+  "Notice of Sale",
+  "Notice of Set-Down (Excluding Urgent Applications)",
+  "Notice of Taxation (Set Down)",
+  "Notice of Withdrawal as Attorney of Record",
+  "Notice of Withdrawal of Action",
+  "Notice to Abide",
+  "Notice to Compel",
+  "Notice to Withdraw",
+
+  "Offer",
+  "Other",
+
+  "Particulars of Claim",
+  "Petition",
+  "Plea",
+  "Pledge and Cession",
+  "Point in limine",
+  "Power of Attorney",
+  "Practice Notes",
+  "Proof of payment",
+  "Proof of Service",
+
+  "Re-issue of amendment initiating document",
+  "Replication [Rule 25(1)]",
+  "Replying Affidavit",
+  "Report",
+  "Request for further particulars",
+  "Rescission Application",
+  "Resolution",
+  "Respondent’s Chronology",
+  "Return of Service",
+  "Review",
+  "Rule 29(c) – Close of Pleadings",
+  "Rule 37 (2) (b) and (7) Notice",
+  "Rule 43 Application",
+  "Rule 53 Record",
+
+  "SARS final demand",
+  "Schedule",
+  "Search report",
+  "Section 129",
+  "Security for Costs",
+  "Service of Foreign Process",
+  "Settlement Agreement",
+  "Settlement Submissions",
+  "Special Plea",
+  "Statement",
+  "Statement of Claim",
+  "Statement of Response",
+  "Subpoena",
+  "Substitute Service",
+  "Substitute Service Application",
+  "Supplementary Affidavit",
+  "Supporting Documents",
+  "Surety",
+
+  "Tax Invoice",
+  "Third Party Notice (Rule 13)",
+  "Trace Report",
+  "Trial Interlocutory Application",
+
+  "Valuation",
+
+  "Warrant of Arrest",
+  "Warrant of Committal",
+  "Writ of Attachment",
+  "Writ of Ejectment",
+  "Writ of Execution"
+
+];
 
 
-    if (text.includes("combined summons")) {
+/* Normalise text for comparison */
 
-      identifiedAs = "Combined Summons";
+function normaliseText(value) {
 
-    }
+  return value
+    .toLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[–—-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-    else if (text.includes("founding affidavit")) {
+}
 
-      identifiedAs = "Founding Affidavit";
 
-    }
+/* Find a Court Online document type */
 
-    else if (text.includes("answering affidavit")) {
+function identifyCourtOnlineType(firstPageText) {
 
-      identifiedAs = "Answering Affidavit";
+  const normalisedText =
+    normaliseText(firstPageText);
 
-    }
 
-    else if (text.includes("replying affidavit")) {
+  /*
+    Longest names are checked first.
+    This prevents "Affidavit" from being
+    selected before "Founding Affidavit",
+    for example.
+  */
 
-      identifiedAs = "Replying Affidavit";
+  const sortedTypes =
+    [...courtOnlineTypes].sort(
+      (a, b) => b.length - a.length
+    );
 
-    }
 
-    else if (text.includes("notice of motion")) {
+  for (const documentType of sortedTypes) {
 
-      identifiedAs = "Notice of Motion";
+    const normalisedType =
+      normaliseText(documentType);
 
-    }
 
-    else if (text.includes("heads of argument")) {
-
-      identifiedAs = "Heads of Argument";
-
-    }
-
-    else if (text.includes("particulars of claim")) {
-
-      identifiedAs = "Particulars of Claim";
-
-    }
-
-    else if (
-      text.includes("notice of intention to defend")
+    if (
+      normalisedText.includes(normalisedType)
     ) {
 
-      identifiedAs =
-        "Notice of Intention to Defend";
+      return documentType;
 
     }
 
+  }
 
-    /* Display result */
 
-    const item =
+  return null;
+
+}
+
+
+/* Identify the Court Online document type */
+
+const identifiedAs =
+  identifyCourtOnlineType(firstPageText);
+
+
+/* Display result */
+
+const item =
       document.createElement("div");
 
     item.className = "result-item";
