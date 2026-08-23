@@ -3,605 +3,377 @@
 <head>
 
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>CaseLines Bundler</title>
-
+  <title>CaseLines Bundler — Beta 1</title>
 
   <style>
 
     body {
-
       margin: 0;
-
-      font-family:
-        "Century Gothic",
-        CenturyGothic,
-        AppleGothic,
-        sans-serif;
-
+      font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
       background: #ffffff;
-
       color: #2f3720;
-
     }
-
 
     header {
-
       padding: 25px 40px;
-
-      border-bottom:
-        1px solid #d8d5d0;
-
+      border-bottom: 1px solid #d8d5d0;
     }
-
 
     h1 {
-
       margin: 0;
-
       font-size: 32px;
-
     }
 
+    h2 {
+      color: #2f3720;
+    }
 
     .tagline {
-
       color: #666269;
-
       margin-top: 8px;
-
     }
-
 
     main {
-
       max-width: 1000px;
-
-      margin: 50px auto;
-
+      margin: 45px auto;
       padding: 20px;
-
     }
 
-
-    .intro {
-
-      text-align: center;
-
+    .beta-banner {
+      background: #f5efe0;
+      border: 1px solid #c9b56b;
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 35px;
+      color: #4d4322;
     }
 
+    .beta-banner h2 {
+      margin-top: 0;
+      color: #6d5815;
+    }
+
+    .beta-banner p {
+      line-height: 1.6;
+    }
+
+    .privacy-banner {
+      background: #eef1ea;
+      border: 1px solid #c8cec0;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
 
     .upload-box {
-
       margin-top: 35px;
-
       padding: 60px 30px;
-
-      border:
-        2px dashed #2f3720;
-
+      border: 2px dashed #2f3720;
       border-radius: 12px;
-
       background: #d8d5d0;
-
       text-align: center;
-
     }
-
 
     .upload-box h2 {
-
       margin-top: 0;
-
     }
-
 
     input[type="file"] {
-
       display: none;
-
     }
 
+    .upload-button,
+    .process-button,
+    .bundle-button,
+    .feedback-button {
+      display: inline-block;
+      font-family: "Century Gothic", CenturyGothic, sans-serif;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+    }
 
     .upload-button {
-
-      display: inline-block;
-
       margin-top: 20px;
-
       padding: 14px 28px;
-
       background: #2f3720;
-
       color: white;
-
-      border-radius: 6px;
-
-      cursor: pointer;
-
     }
 
-
-    .upload-button:hover {
-
-      opacity: 0.9;
-
-    }
-
-
-    .process-button,
-    .bundle-button {
-
+    .process-button {
       margin-top: 30px;
-
       padding: 16px 32px;
-
       background: #2f3720;
-
       color: white;
-
       border: none;
-
-      border-radius: 6px;
-
-      font-family:
-        "Century Gothic",
-        CenturyGothic,
-        sans-serif;
-
       font-size: 16px;
-
-      cursor: pointer;
-
     }
 
-
-    .process-button:disabled,
-    .bundle-button:disabled {
-
+    .process-button:disabled {
       background: #666269;
-
       cursor: not-allowed;
-
       opacity: 0.6;
-
     }
 
+    .bundle-button {
+      padding: 16px 30px;
+      background: #2f3720;
+      color: white;
+      border: none;
+      font-size: 16px;
+    }
+
+    .bundle-button:disabled {
+      background: #666269;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .feedback-button {
+      padding: 12px 22px;
+      background: #666269;
+      color: white;
+      margin-top: 10px;
+    }
 
     #file-list {
-
       margin-top: 30px;
-
       text-align: left;
-
     }
-
 
     .file {
-
       padding: 12px;
-
       margin-top: 8px;
-
-      border-bottom:
-        1px solid #d8d5d0;
-
+      border-bottom: 1px solid #d8d5d0;
     }
-
 
     #file-count {
-
       margin-top: 15px;
-
       text-align: center;
-
     }
-
 
     .results {
-
       margin-top: 40px;
-
     }
-
 
     .results h2 {
-
       text-align: center;
-
     }
-
 
     .result-item {
-
       padding: 20px;
-
       margin-top: 12px;
-
-      border:
-        1px solid #d8d5d0;
-
+      border: 1px solid #d8d5d0;
       border-radius: 8px;
-
       background: white;
-
     }
-
 
     .result-name {
-
       font-weight: bold;
-
       color: #2f3720;
-
       font-size: 16px;
-
-      margin-bottom: 12px;
-
       word-break: break-word;
-
     }
-
 
     .result-status {
-
+      margin-top: 12px;
       color: #666269;
-
       font-size: 14px;
-
-      line-height: 1.7;
-
+      line-height: 1.6;
     }
-
 
     .confirmed {
-
       color: #2f3720;
-
       font-weight: bold;
-
     }
-
 
     .provisional {
-
       color: #8a6d1d;
-
       font-weight: bold;
-
     }
-
 
     .warning {
-
       color: #9b2c2c;
-
       font-weight: bold;
-
     }
-
 
     .processing {
-
       margin-top: 20px;
-
       padding: 15px;
-
       border-radius: 8px;
-
       background: #d8d5d0;
-
       text-align: center;
-
       font-weight: bold;
-
     }
 
+    .review-section {
+      margin-top: 45px;
+      padding: 25px;
+      background: #f5efe0;
+      border: 1px solid #c9b56b;
+      border-radius: 10px;
+    }
+
+    .review-section h2 {
+      margin-top: 0;
+    }
+
+    .review-item {
+      background: white;
+      border: 1px solid #d8d5d0;
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 12px;
+    }
+
+    .review-item select {
+      margin-top: 12px;
+      width: 100%;
+      max-width: 700px;
+      padding: 10px;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      font-family: "Century Gothic", CenturyGothic, sans-serif;
+      font-size: 14px;
+    }
+
+    .review-confirmed {
+      color: #2f3720;
+      font-weight: bold;
+    }
+
+    .review-provisional {
+      color: #8a6d1d;
+      font-weight: bold;
+    }
+
+    .review-actions {
+      text-align: center;
+      margin-top: 25px;
+    }
+
+    .bundle-section {
+      margin-top: 45px;
+      padding: 30px;
+      background: #eef1ea;
+      border: 1px solid #c8cec0;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .bundle-section h2 {
+      margin-top: 0;
+    }
+
+    .bundle-preview {
+      margin-top: 20px;
+      text-align: left;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #d8d5d0;
+    }
+
+    .folder-preview {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .save-warning {
+      margin-top: 20px;
+      padding: 18px;
+      background: #f5efe0;
+      border: 1px solid #c9b56b;
+      border-radius: 8px;
+      color: #5c4e20;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .disclaimer-section {
+      margin-top: 60px;
+      border-top: 1px solid #d8d5d0;
+      padding-top: 35px;
+    }
+
+    .disclaimer-section h2 {
+      margin-top: 35px;
+    }
+
+    .disclaimer-section p,
+    .disclaimer-section li {
+      color: #4e4e4e;
+      line-height: 1.7;
+    }
+
+    .disclaimer-section ul {
+      padding-left: 25px;
+    }
+
+    .acknowledgement {
+      margin-top: 30px;
+      padding: 22px;
+      background: #f5efe0;
+      border: 1px solid #c9b56b;
+      border-radius: 8px;
+    }
+
+    .acknowledgement label {
+      display: block;
+      font-weight: bold;
+      line-height: 1.6;
+      cursor: pointer;
+    }
+
+    .acknowledgement input {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    .feedback-section {
+      margin-top: 45px;
+      padding: 25px;
+      background: #d8d5d0;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .feedback-section p {
+      line-height: 1.6;
+    }
 
     .privacy {
-
-      margin-top: 20px;
-
+      margin-top: 30px;
       color: #666269;
-
       font-size: 14px;
-
       text-align: center;
-
     }
-
 
     .counter {
-
-      margin-top: 70px;
-
+      margin-top: 50px;
       padding: 30px;
-
       background: #d8d5d0;
-
       border-radius: 12px;
-
       text-align: center;
-
     }
-
 
     .counter-number {
-
       font-size: 40px;
-
       font-weight: bold;
-
     }
 
-
-    /* =====================================================
-       VERIFICATION AREA
-    ===================================================== */
-
-    #verification {
-
+    .hidden {
       display: none;
-
-      margin-top: 50px;
-
-      padding: 25px;
-
-      border:
-        1px solid #d8d5d0;
-
-      border-radius: 12px;
-
-      background: #ffffff;
-
     }
-
-
-    #verification h2 {
-
-      text-align: center;
-
-      margin-top: 0;
-
-    }
-
-
-    .verification-intro {
-
-      text-align: center;
-
-      color: #666269;
-
-      line-height: 1.6;
-
-      margin-bottom: 25px;
-
-    }
-
-
-    .verification-item {
-
-      padding: 18px;
-
-      margin-top: 12px;
-
-      border:
-        1px solid #d8d5d0;
-
-      border-radius: 8px;
-
-      background: #fafafa;
-
-    }
-
-
-    .verification-name {
-
-      font-weight: bold;
-
-      margin-bottom: 8px;
-
-      word-break: break-word;
-
-    }
-
-
-    .verification-info {
-
-      color: #666269;
-
-      font-size: 14px;
-
-      margin-bottom: 12px;
-
-      line-height: 1.6;
-
-    }
-
-
-    .verification-label {
-
-      display: block;
-
-      font-weight: bold;
-
-      margin-bottom: 6px;
-
-      color: #2f3720;
-
-    }
-
-
-    .section-select {
-
-      width: 100%;
-
-      max-width: 700px;
-
-      padding: 11px;
-
-      border:
-        1px solid #aaa;
-
-      border-radius: 6px;
-
-      background: white;
-
-      font-family:
-        "Century Gothic",
-        CenturyGothic,
-        sans-serif;
-
-      font-size: 14px;
-
-    }
-
-
-    .manual-change {
-
-      color: #8a6d1d;
-
-      font-size: 13px;
-
-      margin-top: 7px;
-
-    }
-
-
-    .date-warning {
-
-      margin-top: 8px;
-
-      color: #9b2c2c;
-
-      font-weight: bold;
-
-    }
-
-
-    .verification-summary {
-
-      margin-top: 25px;
-
-      padding: 18px;
-
-      background: #d8d5d0;
-
-      border-radius: 8px;
-
-      text-align: center;
-
-      line-height: 1.7;
-
-    }
-
-
-    .bundle-area {
-
-      display: none;
-
-      margin-top: 40px;
-
-      text-align: center;
-
-    }
-
-
-    .bundle-message {
-
-      margin-top: 20px;
-
-      padding: 20px;
-
-      background: #d8d5d0;
-
-      border-radius: 8px;
-
-      line-height: 1.6;
-
-    }
-
-
-    .download-button {
-
-      display: inline-block;
-
-      margin-top: 25px;
-
-      padding: 16px 32px;
-
-      background: #2f3720;
-
-      color: white;
-
-      border-radius: 6px;
-
-      text-decoration: none;
-
-      font-weight: bold;
-
-    }
-
-
-    .download-button:hover {
-
-      opacity: 0.9;
-
-    }
-
-
-    .reset-button {
-
-      display: inline-block;
-
-      margin-top: 15px;
-
-      padding: 12px 24px;
-
-      background: #666269;
-
-      color: white;
-
-      border: none;
-
-      border-radius: 6px;
-
-      cursor: pointer;
-
-      font-family:
-        "Century Gothic",
-        CenturyGothic,
-        sans-serif;
-
-    }
-
-
-    /* =====================================================
-       DRAG AND DROP
-    ===================================================== */
-
-    .upload-box.dragover {
-
-      background: #c8c5c0;
-
-      border-color: #2f3720;
-
-    }
-
 
   </style>
 
 </head>
 
-
 <body>
-
 
 <header>
 
@@ -617,35 +389,87 @@
 <main>
 
 
-  <div class="intro">
+  <!-- =====================================================
+       BETA NOTICE
+  ====================================================== -->
 
-    <h2>
-      Upload your Court Online documents
-    </h2>
+  <div class="beta-banner">
+
+    <h2>⚠ BETA 1 — FOR TESTING AND FEEDBACK</h2>
 
     <p>
-      Select all of the PDF documents you downloaded
-      from Court Online.
+      CaseLines Bundler is currently provided as a
+      <strong>Beta version</strong> for testing by selected users
+      and for the purpose of obtaining feedback and identifying
+      errors or improvements.
+    </p>
+
+    <p>
+      Document classification, filing-date extraction, filing-time
+      extraction, chronological ordering, CaseLines allocation and
+      filename generation may contain errors.
+    </p>
+
+    <p>
+      <strong>
+        Always review and verify the results before relying upon,
+        submitting, uploading or otherwise using the generated
+        documents for any legal, court or professional purpose.
+      </strong>
     </p>
 
   </div>
 
 
   <!-- =====================================================
-       UPLOAD AREA
+       LOCAL PROCESSING NOTICE
   ====================================================== -->
 
-  <div
-    class="upload-box"
-    id="upload-box"
-  >
+  <div class="privacy-banner">
 
-    <h2>
-      Drag and drop your PDFs here
-    </h2>
+    <strong>🔒 Local browser processing</strong>
+
+    <p>
+      Your PDF documents are designed to remain on your computer
+      and are processed locally in your web browser.
+    </p>
+
+    <p>
+      The documents are not uploaded by this application to a
+      server operated by the application and are not intentionally
+      transmitted to the developer for storage or processing.
+    </p>
+
+    <p>
+      <strong>
+        Remember to save your generated ZIP file before closing
+        this page.
+      </strong>
+      The application does not retain the generated bundle for
+      later retrieval.
+    </p>
+
+  </div>
+
+
+  <!-- =====================================================
+       UPLOAD
+  ====================================================== -->
+
+  <h2 style="text-align:center;">
+    Upload your Court Online documents
+  </h2>
+
+  <p style="text-align:center;">
+    Select all of the PDF documents you downloaded from Court Online.
+  </p>
+
+
+  <div class="upload-box">
+
+    <h2>Drag and drop your PDFs here</h2>
 
     <p>or</p>
-
 
     <label
       for="file-upload"
@@ -653,7 +477,6 @@
     >
       Select Multiple PDF Files
     </label>
-
 
     <input
       id="file-upload"
@@ -667,7 +490,6 @@
 
   <div id="file-list"></div>
 
-
   <button
     id="process-button"
     class="process-button"
@@ -680,133 +502,479 @@
   <p id="file-count"></p>
 
 
-  <!-- =====================================================
-       PROCESSING RESULTS
-  ====================================================== -->
-
-  <div
-    id="results"
-    class="results"
-  ></div>
+  <div id="results" class="results"></div>
 
 
   <!-- =====================================================
-       VERIFICATION
+       REVIEW SECTION
   ====================================================== -->
 
   <div
-    id="verification"
+    id="review-section"
+    class="review-section hidden"
   >
 
-    <h2>
-      Verify CaseLines Allocations
-    </h2>
+    <h2>Review Provisional Allocations</h2>
 
-
-    <p class="verification-intro">
-
-      Documents marked
-      <strong>Provisional - Review Required</strong>
-      should be checked before the bundle is created.
-
-      You may change the CaseLines section using the
-      dropdown list.
-
-      <br><br>
-
-      Confirmed allocations do not require review,
-      but they can also be changed if necessary.
-
+    <p>
+      The documents below have been provisionally allocated to
+      CaseLines sections.
     </p>
 
+    <p>
+      Please review each provisional allocation and use the
+      dropdown list to select the correct CaseLines section
+      where necessary.
+    </p>
+
+    <div id="review-list"></div>
+
+    <div class="review-actions">
+
+      <button
+        id="confirm-review-button"
+        class="process-button"
+      >
+        Confirm Allocations
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       BUNDLE SECTION
+  ====================================================== -->
+
+  <div
+    id="bundle-section"
+    class="bundle-section hidden"
+  >
+
+    <h2>CaseLines Bundle Ready</h2>
+
+    <p>
+      The documents have been sorted chronologically and grouped
+      into CaseLines sections.
+    </p>
 
     <div
-      id="verification-list"
+      id="bundle-preview"
+      class="bundle-preview"
     ></div>
 
+    <div class="save-warning">
 
-    <div
-      id="verification-summary"
-      class="verification-summary"
-    ></div>
+      <strong>⚠ IMPORTANT — SAVE YOUR ZIP FILE</strong>
 
+      <p>
+        Your documents are not retained by the application after
+        processing. Once you leave this page, close the browser or
+        refresh the page, the generated bundle cannot be retrieved
+        from this application.
+      </p>
+
+      <p>
+        Please make sure that the ZIP file has been successfully
+        downloaded and saved before ending your session.
+      </p>
+
+    </div>
+
+    <br>
 
     <button
-      id="bundle-button"
+      id="download-bundle-button"
       class="bundle-button"
     >
-      Create CaseLines Bundle
+      Download CaseLines Bundle
     </button>
 
   </div>
 
 
   <!-- =====================================================
-       BUNDLE RESULT
+       FEEDBACK
   ====================================================== -->
 
-  <div
-    id="bundle-area"
-    class="bundle-area"
-  >
+  <div class="feedback-section">
 
-    <h2>
-      CaseLines Bundle Ready
-    </h2>
+    <h2>Beta 1 — We'd Appreciate Your Feedback</h2>
 
+    <p>
+      If you encounter an incorrect classification, filing date,
+      filing time, CaseLines allocation, filename, sorting result,
+      folder structure or any other problem, please let us know.
+    </p>
 
-    <div
-      id="bundle-message"
-      class="bundle-message"
-    ></div>
-
+    <p>
+      Where possible, please include what you uploaded, what the
+      application did, what you expected it to do, and any relevant
+      error message or screenshot.
+    </p>
 
     <a
-      id="download-button"
-      class="download-button"
-      href="#"
-      download="CaseLines_Bundle.zip"
+      class="feedback-button"
+      href="mailto:ned@live.co.za?subject=CaseLines%20Bundler%20Beta%201%20Feedback"
     >
-      Download CaseLines Bundle
+      Send Beta Feedback
     </a>
 
+  </div>
 
-    <br>
+
+  <!-- =====================================================
+       FULL DISCLAIMER
+  ====================================================== -->
+
+  <div class="disclaimer-section">
+
+    <h2>Beta Version — For Testing and Feedback</h2>
+
+    <p>
+      CaseLines Bundler is currently provided as a
+      <strong>Beta version</strong> for testing by selected users
+      and for the purpose of obtaining feedback and identifying
+      errors or improvements.
+    </p>
+
+    <p>
+      The application is designed to assist users in organising
+      Court Online documents into a CaseLines-ready structure.
+      It uses automated document recognition, filing-date and
+      filing-time extraction, document classification, sorting
+      and folder allocation.
+    </p>
+
+    <p>
+      Because the application performs automated processing,
+      <strong>errors may occur</strong>. These may include
+      incorrect document-type identification, incorrect filing
+      dates or times, incorrect CaseLines classifications,
+      incorrect ordering, incorrect filenames or other errors.
+    </p>
+
+    <p>
+      <strong>
+        The application does not replace professional judgment
+        or review. Users are responsible for checking and
+        verifying the output before relying upon it, submitting
+        it to a court, uploading it to CaseLines, or otherwise
+        using it for any legal or professional purpose.
+      </strong>
+    </p>
 
 
-    <button
-      id="reset-button"
-      class="reset-button"
-    >
-      Start Again
-    </button>
+    <h2>Privacy and POPIA</h2>
+
+    <h3>Local processing of documents</h3>
+
+    <p>
+      CaseLines Bundler is designed to process uploaded PDF
+      documents <strong>locally on the user's computer, within
+      the user's web browser</strong>.
+    </p>
+
+    <p>
+      The PDF documents selected by the user are not uploaded by
+      CaseLines Bundler to a server operated by the application
+      and are not intentionally transmitted to the developer for
+      storage or processing.
+    </p>
+
+    <p>
+      The application processes the documents in the user's
+      browser in order to identify document types, extract filing
+      dates and times, classify documents, rename documents and
+      prepare the CaseLines bundle.
+    </p>
+
+    <p>
+      The application does not intentionally retain the uploaded
+      PDF documents after processing has been completed.
+    </p>
+
+
+    <h3>POPIA</h3>
+
+    <p>
+      Because the application is designed so that the user's
+      documents remain on the user's computer and are processed
+      locally in the user's browser, <strong>the developer does
+      not receive, collect or retain the personal information
+      contained in those documents through the operation of the
+      application.</strong>
+    </p>
+
+    <p>
+      Accordingly, the application is designed so that the
+      developer does not itself undertake the remote collection
+      or storage of the personal information contained in the
+      documents uploaded by the user.
+    </p>
+
+    <p>
+      <strong>
+        Users remain responsible for their own handling of
+        personal information and confidential information,
+      </strong>
+      including ensuring that they are authorised to access,
+      process and use the documents and that their use of the
+      application complies with any applicable legal,
+      professional, confidentiality, court or organisational
+      requirements.
+    </p>
+
+    <p>
+      <strong>Important:</strong> This statement describes the
+      intended technical operation of the application. It should
+      not be interpreted as legal advice or as a determination
+      that any particular use of the application is exempt from
+      POPIA or any other applicable law.
+    </p>
+
+
+    <h2>Important — Save Your Bundle</h2>
+
+    <p>
+      The application does <strong>not retain the PDF documents
+      after processing</strong>.
+    </p>
+
+    <p>
+      Once the CaseLines ZIP file has been generated, the original
+      PDFs and the generated bundle are not stored by the
+      application for later retrieval.
+    </p>
+
+    <p>
+      <strong>
+        You must save the generated ZIP file to your computer
+        before leaving the page or closing your browser.
+      </strong>
+    </p>
+
+    <p>
+      If you leave the page, close the browser, refresh the page,
+      or otherwise lose the generated file, the application will
+      not be able to retrieve or restore the bundle for you.
+    </p>
+
+
+    <h2>User Responsibility</h2>
+
+    <p>
+      CaseLines Bundler is an <strong>assistance and
+      document-organisation tool</strong>.
+    </p>
+
+    <p>The user remains responsible for:</p>
+
+    <ul>
+
+      <li>
+        verifying every document's Court Online document type;
+      </li>
+
+      <li>
+        verifying every filing date and filing time;
+      </li>
+
+      <li>
+        verifying the chronological order of documents;
+      </li>
+
+      <li>
+        reviewing all
+        <strong>Provisional — Review Required</strong>
+        classifications;
+      </li>
+
+      <li>
+        correcting classifications where necessary;
+      </li>
+
+      <li>
+        verifying filenames and CaseLines section allocations;
+      </li>
+
+      <li>
+        ensuring that all required documents have been included;
+      </li>
+
+      <li>
+        ensuring that no documents have been omitted;
+      </li>
+
+      <li>
+        ensuring that the resulting bundle complies with the
+        applicable CaseLines requirements; and
+      </li>
+
+      <li>
+        verifying the final ZIP file before uploading or using it.
+      </li>
+
+    </ul>
+
+    <p>
+      <strong>
+        No output generated by CaseLines Bundler should be treated
+        as automatically correct merely because the application
+        has classified or processed it.
+      </strong>
+    </p>
+
+
+    <h2>Legal Disclaimer</h2>
+
+    <p>
+      CaseLines Bundler does <strong>not</strong> provide legal
+      advice, legal opinions or advice regarding court procedure.
+    </p>
+
+    <p>
+      The application does not determine what documents a user is
+      legally required to file, what documents should be included
+      in a court bundle, or what CaseLines section is legally
+      appropriate in any particular matter.
+    </p>
+
+    <p>
+      The classifications and mappings produced by the application
+      are intended to assist the user and may be incorrect or
+      incomplete.
+    </p>
+
+    <p>
+      <strong>
+        The user must exercise their own professional judgment
+        and verify the output before using it for any legal,
+        court or professional purpose.
+      </strong>
+    </p>
+
+    <p>
+      The developer makes no representation that the application
+      will identify, classify, sort, rename or organise every
+      document correctly.
+    </p>
+
+    <p>
+      The Beta version may contain defects, errors, omissions or
+      incomplete functionality.
+    </p>
+
+
+    <h2>Confidentiality</h2>
+
+    <p>
+      Users should only upload documents that they are authorised
+      to process using the application.
+    </p>
+
+    <p>
+      Users remain responsible for complying with any duties of
+      confidentiality, privilege, professional secrecy, court
+      rules, contractual obligations and applicable legislation
+      relating to the documents they process.
+    </p>
+
+    <p>
+      Although the application is designed for local
+      browser-based processing, users should ensure that they
+      are using the application in an appropriate and secure
+      environment.
+    </p>
+
+
+    <h2>Beta Feedback</h2>
+
+    <p>
+      This is <strong>Beta 1</strong>, and your feedback is
+      important.
+    </p>
+
+    <p>
+      If you encounter an incorrect classification, filing date,
+      filing time, CaseLines allocation, filename, sorting result,
+      folder structure or any other problem, please report it.
+    </p>
+
+    <p>
+      Please include, where possible:
+    </p>
+
+    <ul>
+
+      <li>what you uploaded;</li>
+      <li>what the application did;</li>
+      <li>what you expected it to do; and</li>
+      <li>any relevant error message or screenshot.</li>
+
+    </ul>
+
+    <p>
+      <strong>Feedback email:</strong>
+      <a href="mailto:ned@live.co.za">
+        ned@live.co.za
+      </a>
+    </p>
+
+
+    <!-- ===================================================
+         ACKNOWLEDGEMENT
+    ==================================================== -->
+
+    <div class="acknowledgement">
+
+      <h2>Beta Acknowledgement</h2>
+
+      <label>
+
+        <input
+          type="checkbox"
+          id="acknowledgement-checkbox"
+        >
+
+        I understand that CaseLines Bundler is Beta software.
+        I understand that its output may contain errors and that
+        I am responsible for reviewing and verifying the generated
+        results before using them for any legal, court or
+        professional purpose. I understand that my documents are
+        processed locally in my browser and are not retained by
+        the application after processing. I understand that I
+        must save my generated ZIP file because the application
+        cannot retrieve it after the session ends.
+
+      </label>
+
+    </div>
+
 
   </div>
 
 
   <p class="privacy">
-    No login required • Your documents are not permanently retained
+    🔒 Local browser processing • Documents are not uploaded to or
+    retained by this application • Save your generated ZIP before
+    closing this page
   </p>
 
 
   <div class="counter">
 
-    <div
-      class="counter-number"
-      id="counter-number"
-    >
+    <div class="counter-number">
       0
     </div>
 
-    <p>
-      Bundles Prepared
-    </p>
+    <p>Bundles Prepared</p>
 
   </div>
 
 
 </main>
-
 
 
 <!-- =========================================================
@@ -817,7 +985,7 @@
 
 
 <!-- =========================================================
-     TESSERACT OCR
+     TESSERACT
 ========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -830,110 +998,54 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 
-
 <script>
-
 
 /* =========================================================
    BASIC SETUP
 ========================================================= */
 
-
 const fileUpload =
   document.getElementById("file-upload");
-
 
 const fileList =
   document.getElementById("file-list");
 
-
 const processButton =
   document.getElementById("process-button");
-
 
 const fileCount =
   document.getElementById("file-count");
 
-
 const results =
   document.getElementById("results");
 
+const reviewSection =
+  document.getElementById("review-section");
 
-const verification =
-  document.getElementById("verification");
+const reviewList =
+  document.getElementById("review-list");
 
+const confirmReviewButton =
+  document.getElementById("confirm-review-button");
 
-const verificationList =
-  document.getElementById("verification-list");
+const bundleSection =
+  document.getElementById("bundle-section");
 
+const bundlePreview =
+  document.getElementById("bundle-preview");
 
-const verificationSummary =
-  document.getElementById("verification-summary");
+const downloadBundleButton =
+  document.getElementById("download-bundle-button");
 
-
-const bundleButton =
-  document.getElementById("bundle-button");
-
-
-const bundleArea =
-  document.getElementById("bundle-area");
-
-
-const bundleMessage =
-  document.getElementById("bundle-message");
-
-
-const downloadButton =
-  document.getElementById("download-button");
-
-
-const resetButton =
-  document.getElementById("reset-button");
-
-
-const uploadBox =
-  document.getElementById("upload-box");
-
-
-const counterNumber =
-  document.getElementById("counter-number");
-
-
-
-/* =========================================================
-   GLOBAL DOCUMENT STORAGE
-========================================================= */
-
-
-let processedDocuments = [];
-
-
-/* =========================================================
-   BUNDLE COUNTER
-========================================================= */
-
-
-let bundlesPrepared =
-  Number(
-    localStorage.getItem(
-      "caseLinesBundlesPrepared"
-    ) || 0
-  );
-
-
-counterNumber.textContent =
-  bundlesPrepared;
-
+const acknowledgementCheckbox =
+  document.getElementById("acknowledgement-checkbox");
 
 
 /* =========================================================
    PDF.JS WORKER
 ========================================================= */
 
-
-if (
-  typeof pdfjsLib !== "undefined"
-) {
+if (typeof pdfjsLib !== "undefined") {
 
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -941,11 +1053,29 @@ if (
 }
 
 
+/* =========================================================
+   BUNDLE STATE
+========================================================= */
+
+let processedDocuments = [];
+
+let bundleReady = false;
+
+let bundleCount =
+  Number(
+    localStorage.getItem("caseLinesBundleCount") || 0
+  );
+
+
+document.querySelector(
+  ".counter-number"
+).textContent =
+  bundleCount;
+
 
 /* =========================================================
    COURT ONLINE DOCUMENT TYPES
 ========================================================= */
-
 
 const courtOnlineTypes = [
 
@@ -1165,11 +1295,9 @@ const courtOnlineTypes = [
 ];
 
 
-
 /* =========================================================
    CASELINES SECTIONS
 ========================================================= */
-
 
 const caseLinesSections = [
 
@@ -1252,11 +1380,9 @@ const caseLinesSections = [
 ];
 
 
-
 /* =========================================================
    LEVEL 1 — EXPLICIT MAPPING
 ========================================================= */
-
 
 const caseLinesMapping = {
 
@@ -1428,11 +1554,9 @@ const caseLinesMapping = {
 };
 
 
-
 /* =========================================================
    LEVEL 2 — SUPPLIED AMBIGUOUS MAPPINGS
 ========================================================= */
-
 
 const suppliedCaseLinesMapping = {
 
@@ -1532,11 +1656,9 @@ const suppliedCaseLinesMapping = {
 };
 
 
-
 /* =========================================================
    TEXT NORMALISATION
 ========================================================= */
-
 
 function normaliseText(value) {
 
@@ -1550,38 +1672,27 @@ function normaliseText(value) {
 }
 
 
-
 /* =========================================================
    IDENTIFY COURT ONLINE DOCUMENT TYPE
 ========================================================= */
-
 
 function identifyCourtOnlineType(firstPageText) {
 
   const normalisedText =
     normaliseText(firstPageText);
 
-
   const sortedTypes =
     [...courtOnlineTypes].sort(
-      (a, b) =>
-        b.length - a.length
+      (a, b) => b.length - a.length
     );
 
-
-  for (
-    const documentType
-    of sortedTypes
-  ) {
+  for (const documentType of sortedTypes) {
 
     const normalisedType =
       normaliseText(documentType);
 
-
     if (
-      normalisedText.includes(
-        normalisedType
-      )
+      normalisedText.includes(normalisedType)
     ) {
 
       return documentType;
@@ -1590,36 +1701,26 @@ function identifyCourtOnlineType(firstPageText) {
 
   }
 
-
   return null;
 
 }
-
 
 
 /* =========================================================
    EXTRACT FILING DATE
 ========================================================= */
 
-
 function extractFilingDate(firstPageText) {
 
   if (!firstPageText) {
-
     return null;
-
   }
-
 
   const datePattern =
     /(?:on|dated)\s+(\d{1,2}\/\d{1,2}\/\d{4})(?:\s+at\s+(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?))?/i;
 
-
   const match =
-    firstPageText.match(
-      datePattern
-    );
-
+    firstPageText.match(datePattern);
 
   if (!match) {
 
@@ -1628,17 +1729,12 @@ function extractFilingDate(firstPageText) {
         /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/
       );
 
-
     if (!fallback) {
-
       return null;
-
     }
-
 
     const parts =
       fallback[1].split("/");
-
 
     return {
 
@@ -1652,27 +1748,13 @@ function extractFilingDate(firstPageText) {
 
   }
 
-
   const dateParts =
     match[1].split("/");
-
-
-  const day =
-    dateParts[0].padStart(2, "0");
-
-
-  const month =
-    dateParts[1].padStart(2, "0");
-
-
-  const year =
-    dateParts[2];
-
 
   return {
 
     date:
-      `${year}-${month}-${day}`,
+      `${dateParts[2]}-${dateParts[1].padStart(2, "0")}-${dateParts[0].padStart(2, "0")}`,
 
     time:
       match[2] || ""
@@ -1682,11 +1764,9 @@ function extractFilingDate(firstPageText) {
 }
 
 
-
 /* =========================================================
-   READ FIRST PAGE — NORMAL PDF TEXT
+   READ FIRST PAGE
 ========================================================= */
-
 
 async function readFirstPage(file) {
 
@@ -1695,28 +1775,20 @@ async function readFirstPage(file) {
     const arrayBuffer =
       await file.arrayBuffer();
 
-
     const pdf =
       await pdfjsLib.getDocument({
         data: arrayBuffer
       }).promise;
 
-
     const page =
       await pdf.getPage(1);
-
 
     const textContent =
       await page.getTextContent();
 
-
-    const text =
-      textContent.items
-        .map(item => item.str)
-        .join(" ");
-
-
-    return text;
+    return textContent.items
+      .map(item => item.str)
+      .join(" ");
 
   } catch (error) {
 
@@ -1726,7 +1798,6 @@ async function readFirstPage(file) {
       error
     );
 
-
     return "";
 
   }
@@ -1734,120 +1805,81 @@ async function readFirstPage(file) {
 }
 
 
-
 /* =========================================================
    OCR
 ========================================================= */
 
-
 async function readFirstPageWithOCR(file) {
 
-  const OCR_TIMEOUT =
-    30000;
-
+  const OCR_TIMEOUT = 30000;
 
   try {
 
-    const ocrPromise =
-      (async () => {
+    const ocrPromise = (async () => {
 
-        const arrayBuffer =
-          await file.arrayBuffer();
+      const arrayBuffer =
+        await file.arrayBuffer();
 
-
-        const pdf =
-          await pdfjsLib.getDocument({
-            data: arrayBuffer
-          }).promise;
-
-
-        const page =
-          await pdf.getPage(1);
-
-
-        const viewport =
-          page.getViewport({
-            scale: 1.5
-          });
-
-
-        const canvas =
-          document.createElement(
-            "canvas"
-          );
-
-
-        const context =
-          canvas.getContext(
-            "2d"
-          );
-
-
-        canvas.width =
-          Math.ceil(
-            viewport.width
-          );
-
-
-        canvas.height =
-          Math.ceil(
-            viewport.height
-          );
-
-
-        await page.render({
-
-          canvasContext:
-            context,
-
-          viewport:
-            viewport
-
+      const pdf =
+        await pdfjsLib.getDocument({
+          data: arrayBuffer
         }).promise;
 
+      const page =
+        await pdf.getPage(1);
 
-        const result =
-          await Tesseract.recognize(
-            canvas,
-            "eng"
-          );
+      const viewport =
+        page.getViewport({
+          scale: 1.5
+        });
 
+      const canvas =
+        document.createElement("canvas");
 
-        return (
-          result.data.text ||
-          ""
+      const context =
+        canvas.getContext("2d");
+
+      canvas.width =
+        Math.ceil(viewport.width);
+
+      canvas.height =
+        Math.ceil(viewport.height);
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+
+      const result =
+        await Tesseract.recognize(
+          canvas,
+          "eng"
         );
 
-      })();
+      return result.data.text || "";
+
+    })();
 
 
     const timeoutPromise =
-      new Promise(
-        (_, reject) => {
+      new Promise((_, reject) => {
 
-          setTimeout(
-            () => {
+        setTimeout(() => {
 
-              reject(
-                new Error(
-                  "OCR timed out after 30 seconds."
-                )
-              );
-
-            },
-            OCR_TIMEOUT
+          reject(
+            new Error(
+              "OCR timed out after 30 seconds."
+            )
           );
 
-        }
-      );
+        }, OCR_TIMEOUT);
+
+      });
 
 
     return await Promise.race([
-
       ocrPromise,
-
       timeoutPromise
-
     ]);
 
   } catch (error) {
@@ -1858,7 +1890,6 @@ async function readFirstPageWithOCR(file) {
       error
     );
 
-
     return "";
 
   }
@@ -1866,32 +1897,67 @@ async function readFirstPageWithOCR(file) {
 }
 
 
+/* =========================================================
+   PROVISIONAL MAPPING
+========================================================= */
+
+function findProvisionalCaseLinesSection(
+  courtOnlineType
+) {
+
+  const type =
+    normaliseText(courtOnlineType);
+
+  if (!type) {
+
+    return "048 - Any other interlocutory Application";
+
+  }
+
+  if (type.includes("application")) {
+
+    return "048 - Any other interlocutory Application";
+
+  }
+
+  if (type.includes("affidavit")) {
+
+    return "001 - Notice of Motion with Founding Affidavit";
+
+  }
+
+  if (type.includes("report")) {
+
+    return "033 - Expert Reports";
+
+  }
+
+  if (type.includes("notice")) {
+
+    return "044 - Notice of Set-Down";
+
+  }
+
+  return "048 - Any other interlocutory Application";
+
+}
+
 
 /* =========================================================
    CASELINES MAPPING
 ========================================================= */
 
-
-function getCaseLinesSection(
-  courtOnlineType
-) {
-
-
-  /* LEVEL 1 */
+function getCaseLinesSection(courtOnlineType) {
 
   if (
     courtOnlineType &&
-    caseLinesMapping[
-      courtOnlineType
-    ]
+    caseLinesMapping[courtOnlineType]
   ) {
 
     return {
 
       section:
-        caseLinesMapping[
-          courtOnlineType
-        ],
+        caseLinesMapping[courtOnlineType],
 
       status:
         "Confirmed"
@@ -1901,21 +1967,15 @@ function getCaseLinesSection(
   }
 
 
-  /* LEVEL 2 */
-
   if (
     courtOnlineType &&
-    suppliedCaseLinesMapping[
-      courtOnlineType
-    ]
+    suppliedCaseLinesMapping[courtOnlineType]
   ) {
 
     return {
 
       section:
-        suppliedCaseLinesMapping[
-          courtOnlineType
-        ],
+        suppliedCaseLinesMapping[courtOnlineType],
 
       status:
         "Provisional - Review Required"
@@ -1924,36 +1984,13 @@ function getCaseLinesSection(
 
   }
 
-
-  /* LEVEL 3 */
-
-  const provisional =
-    findProvisionalCaseLinesSection(
-      courtOnlineType
-    );
-
-
-  if (provisional) {
-
-    return {
-
-      section:
-        provisional,
-
-      status:
-        "Provisional - Review Required"
-
-    };
-
-  }
-
-
-  /* LEVEL 4 */
 
   return {
 
     section:
-      "048 - Any other interlocutory Application",
+      findProvisionalCaseLinesSection(
+        courtOnlineType
+      ),
 
     status:
       "Provisional - Review Required"
@@ -1963,315 +2000,98 @@ function getCaseLinesSection(
 }
 
 
-
-/* =========================================================
-   PROVISIONAL MAPPING
-========================================================= */
-
-
-function findProvisionalCaseLinesSection(
-  courtOnlineType
-) {
-
-  const type =
-    normaliseText(
-      courtOnlineType
-    );
-
-
-  if (!type) {
-
-    return "048 - Any other interlocutory Application";
-
-  }
-
-
-  if (
-    type.includes(
-      "application"
-    )
-  ) {
-
-    return "048 - Any other interlocutory Application";
-
-  }
-
-
-  if (
-    type.includes(
-      "affidavit"
-    )
-  ) {
-
-    return "001 - Notice of Motion with Founding Affidavit";
-
-  }
-
-
-  if (
-    type.includes(
-      "report"
-    )
-  ) {
-
-    return "033 - Expert Reports";
-
-  }
-
-
-  if (
-    type.includes(
-      "notice"
-    )
-  ) {
-
-    return "044 - Notice of Set-Down";
-
-  }
-
-
-  return "048 - Any other interlocutory Application";
-
-}
-
-
-
 /* =========================================================
    FILE DISPLAY
 ========================================================= */
-
-
-function displaySelectedFiles(
-  files
-) {
-
-  fileList.innerHTML =
-    "";
-
-  results.innerHTML =
-    "";
-
-  verification.style.display =
-    "none";
-
-  bundleArea.style.display =
-    "none";
-
-
-  if (
-    files &&
-    files.length > 0
-  ) {
-
-    processButton.disabled =
-      false;
-
-
-    fileCount.textContent =
-      files.length +
-      " document(s) ready to process";
-
-  } else {
-
-    processButton.disabled =
-      true;
-
-    fileCount.textContent =
-      "";
-
-  }
-
-
-  for (
-    let i = 0;
-    i < files.length;
-    i++
-  ) {
-
-    const file =
-      document.createElement(
-        "div"
-      );
-
-
-    file.className =
-      "file";
-
-
-    file.textContent =
-      "📄 " +
-      files[i].name;
-
-
-    fileList.appendChild(
-      file
-    );
-
-  }
-
-}
-
-
-
-/* =========================================================
-   FILE INPUT
-========================================================= */
-
 
 fileUpload.addEventListener(
   "change",
   function () {
 
-    displaySelectedFiles(
-      Array.from(
-        fileUpload.files
-      )
-    );
+    fileList.innerHTML = "";
+    results.innerHTML = "";
+    reviewSection.classList.add("hidden");
+    bundleSection.classList.add("hidden");
 
-  }
-);
+    processedDocuments = [];
+    bundleReady = false;
 
-
-
-/* =========================================================
-   DRAG AND DROP
-========================================================= */
-
-
-uploadBox.addEventListener(
-  "dragover",
-  function (event) {
-
-    event.preventDefault();
-
-    uploadBox.classList.add(
-      "dragover"
-    );
-
-  }
-);
-
-
-uploadBox.addEventListener(
-  "dragleave",
-  function () {
-
-    uploadBox.classList.remove(
-      "dragover"
-    );
-
-  }
-);
-
-
-uploadBox.addEventListener(
-  "drop",
-  function (event) {
-
-    event.preventDefault();
-
-    uploadBox.classList.remove(
-      "dragover"
-    );
-
-
-    const droppedFiles =
-      Array.from(
-        event.dataTransfer.files
-      ).filter(
-        file =>
-          file.type ===
-            "application/pdf" ||
-          file.name
-            .toLowerCase()
-            .endsWith(".pdf")
-      );
-
+    const files =
+      fileUpload.files;
 
     if (
-      droppedFiles.length === 0
+      files &&
+      files.length > 0
     ) {
 
-      alert(
-        "Please drop PDF documents only."
-      );
+      processButton.disabled =
+        false;
 
-      return;
+      fileCount.textContent =
+        `${files.length} document(s) ready to process`;
+
+    } else {
+
+      processButton.disabled =
+        true;
+
+      fileCount.textContent =
+        "";
 
     }
 
 
-    /*
-      Browser security does not allow us to
-      directly assign arbitrary dropped files
-      to the file input in every browser.
+    for (
+      let i = 0;
+      i < files.length;
+      i++
+    ) {
 
-      We therefore process the dropped files
-      directly by storing them temporarily.
-    */
+      const file =
+        document.createElement("div");
 
-    window.droppedFiles =
-      droppedFiles;
+      file.className =
+        "file";
 
+      file.textContent =
+        "📄 " + files[i].name;
 
-    displaySelectedFiles(
-      droppedFiles
-    );
+      fileList.appendChild(file);
 
-
-    processButton.disabled =
-      false;
-
-
-    fileCount.textContent =
-      droppedFiles.length +
-      " document(s) ready to process";
+    }
 
   }
 );
-
-
-
-/* =========================================================
-   GET CURRENT FILES
-========================================================= */
-
-
-function getCurrentFiles() {
-
-  if (
-    window.droppedFiles &&
-    window.droppedFiles.length
-  ) {
-
-    return Array.from(
-      window.droppedFiles
-    );
-
-  }
-
-
-  return Array.from(
-    fileUpload.files || []
-  );
-
-}
-
 
 
 /* =========================================================
    PROCESS DOCUMENTS
 ========================================================= */
 
-
 processButton.addEventListener(
   "click",
   async function () {
 
+    if (
+      !acknowledgementCheckbox.checked
+    ) {
+
+      alert(
+        "Please read and acknowledge the Beta disclaimer before processing documents."
+      );
+
+      acknowledgementCheckbox.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      return;
+
+    }
+
 
     const files =
-      getCurrentFiles();
-
+      fileUpload.files;
 
     if (
       !files ||
@@ -2286,64 +2106,51 @@ processButton.addEventListener(
     processButton.disabled =
       true;
 
-
     processButton.textContent =
       "Processing Documents...";
-
-
-    verification.style.display =
-      "none";
-
-
-    bundleArea.style.display =
-      "none";
-
 
     results.innerHTML =
       "<h2>Processing Results</h2>";
 
+    reviewSection.classList.add("hidden");
+    bundleSection.classList.add("hidden");
 
-    processedDocuments =
-      [];
+
+    processedDocuments = [];
+
+
+    const documents =
+      Array.from(files);
 
 
     for (
       let i = 0;
-      i < files.length;
+      i < documents.length;
       i++
     ) {
 
-
       const file =
-        files[i];
-
+        documents[i];
 
       fileCount.textContent =
-        `Processing document ${i + 1} of ${files.length}...`;
+        `Processing document ${i + 1} of ${documents.length}...`;
 
 
       const processingMessage =
-        document.createElement(
-          "div"
-        );
-
+        document.createElement("div");
 
       processingMessage.className =
         "processing";
 
-
       processingMessage.textContent =
-        `Processing document ${i + 1} of ${files.length}: ${file.name}`;
-
+        `Processing document ${i + 1} of ${documents.length}: ${file.name}`;
 
       results.appendChild(
         processingMessage
       );
 
 
-      let firstPageText =
-        "";
-
+      let firstPageText = "";
 
       let extractionMethod =
         "PDF text";
@@ -2351,36 +2158,23 @@ processButton.addEventListener(
 
       try {
 
-
-        /* STEP 1 */
-
         firstPageText =
-          await readFirstPage(
-            file
-          );
+          await readFirstPage(file);
 
-
-        /* STEP 2 */
 
         if (
           !firstPageText ||
-          firstPageText.trim()
-            .length < 10
+          firstPageText.trim().length < 10
         ) {
 
           extractionMethod =
             "OCR";
 
-
           firstPageText =
-            await readFirstPageWithOCR(
-              file
-            );
+            await readFirstPageWithOCR(file);
 
         }
 
-
-        /* STEP 3 */
 
         const identifiedAs =
           identifyCourtOnlineType(
@@ -2388,15 +2182,11 @@ processButton.addEventListener(
           );
 
 
-        /* STEP 4 */
-
         const filingInfo =
           extractFilingDate(
             firstPageText
           );
 
-
-        /* STEP 5 */
 
         const mapping =
           getCaseLinesSection(
@@ -2424,11 +2214,11 @@ processButton.addEventListener(
           mapping:
             mapping,
 
-          originalMapping:
-            mapping.section,
-
           extractionMethod:
-            extractionMethod
+            extractionMethod,
+
+          manuallyChanged:
+            false
 
         });
 
@@ -2437,7 +2227,6 @@ processButton.addEventListener(
 
 
       } catch (error) {
-
 
         console.error(
           "Document processing error:",
@@ -2473,11 +2262,11 @@ processButton.addEventListener(
 
           },
 
-          originalMapping:
-            "048 - Any other interlocutory Application",
-
           extractionMethod:
             "Failed",
+
+          manuallyChanged:
+            false,
 
           error:
             error.message
@@ -2492,263 +2281,165 @@ processButton.addEventListener(
     }
 
 
-
-    /* =====================================================
-       SORT CHRONOLOGICALLY
-    ===================================================== */
+    sortDocuments();
 
 
-    processedDocuments.sort(
-      function (a, b) {
+    displayResults();
 
 
-        /*
-          Documents without dates
-          go to the end.
-        */
-
-        if (
-          !a.filingInfo &&
-          !b.filingInfo
-        ) {
-
-          return (
-            a.originalName
-              .localeCompare(
-                b.originalName
-              )
-          );
-
-        }
+    const provisionalDocuments =
+      processedDocuments.filter(
+        doc =>
+          doc.mapping.status
+            .toLowerCase()
+            .includes("provisional")
+      );
 
 
-        if (
-          !a.filingInfo
-        ) {
+    if (
+      provisionalDocuments.length > 0
+    ) {
 
-          return 1;
+      displayReviewSection();
 
-        }
+    } else {
 
+      prepareBundle();
 
-        if (
-          !b.filingInfo
-        ) {
-
-          return -1;
-
-        }
-
-
-        const dateA =
-          getDateTimeValue(
-            a.filingInfo
-          );
-
-
-        const dateB =
-          getDateTimeValue(
-            b.filingInfo
-          );
-
-
-        return (
-          dateA - dateB
-        );
-
-      }
-    );
-
-
-
-    /* =====================================================
-       DISPLAY RESULTS
-    ===================================================== */
-
-
-    displayProcessingResults();
-
-
-    /*
-      Create verification controls.
-    */
-
-    createVerificationList();
+    }
 
 
     processButton.textContent =
       "Documents Processed";
 
-
-    processButton.disabled =
-      false;
-
-
-    fileCount.textContent =
-      `${processedDocuments.length} document(s) processed and sorted oldest to newest.`;
-
-
-    const missingDates =
-      processedDocuments.filter(
-        doc =>
-          !doc.filingInfo
-      ).length;
-
-
-    if (
-      missingDates > 0
-    ) {
-
-      fileCount.textContent +=
-        ` ⚠ ${missingDates} document(s) require date review.`;
-
-    }
-
-
   }
 );
 
 
-
 /* =========================================================
-   DATE VALUE
+   SORT DOCUMENTS
 ========================================================= */
 
+function sortDocuments() {
 
-function getDateTimeValue(
-  filingInfo
-) {
+  processedDocuments.sort(
+    function (a, b) {
 
+      if (
+        !a.filingInfo &&
+        !b.filingInfo
+      ) {
 
-  if (!filingInfo) {
+        return a.originalName.localeCompare(
+          b.originalName
+        );
 
-    return Number.MAX_SAFE_INTEGER;
+      }
 
-  }
+      if (!a.filingInfo) {
+        return 1;
+      }
 
-
-  /*
-    Convert YYYY-MM-DD and the
-    Court Online time into a
-    reliable timestamp.
-
-    This avoids relying on the browser
-    interpreting South African dates.
-  */
-
-
-  const dateParts =
-    filingInfo.date.split("-");
+      if (!b.filingInfo) {
+        return -1;
+      }
 
 
-  const year =
-    Number(
-      dateParts[0]
-    );
+      const dateA =
+        new Date(
+          `${a.filingInfo.date}T${
+            convertTimeForDate(
+              a.filingInfo.time
+            )
+          }`
+        );
+
+      const dateB =
+        new Date(
+          `${b.filingInfo.date}T${
+            convertTimeForDate(
+              b.filingInfo.time
+            )
+          }`
+        );
 
 
-  const month =
-    Number(
-      dateParts[1]
-    );
+      const result =
+        dateA - dateB;
 
 
-  const day =
-    Number(
-      dateParts[2]
-    );
+      if (result !== 0) {
+        return result;
+      }
 
 
-  let hours = 0;
-
-  let minutes = 0;
-
-  let seconds = 0;
-
-
-  if (
-    filingInfo.time
-  ) {
-
-    const timeMatch =
-      filingInfo.time.match(
-        /(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i
+      return a.originalName.localeCompare(
+        b.originalName
       );
 
-
-    if (
-      timeMatch
-    ) {
-
-      hours =
-        Number(
-          timeMatch[1]
-        );
-
-
-      minutes =
-        Number(
-          timeMatch[2]
-        );
-
-
-      seconds =
-        Number(
-          timeMatch[3] || 0
-        );
-
-
-      const ampm =
-        (
-          timeMatch[4] ||
-          ""
-        ).toUpperCase();
-
-
-      if (
-        ampm === "PM" &&
-        hours < 12
-      ) {
-
-        hours += 12;
-
-      }
-
-
-      if (
-        ampm === "AM" &&
-        hours === 12
-      ) {
-
-        hours = 0;
-
-      }
-
     }
-
-  }
-
-
-  return new Date(
-    year,
-    month - 1,
-    day,
-    hours,
-    minutes,
-    seconds
-  ).getTime();
+  );
 
 }
 
 
-
 /* =========================================================
-   DISPLAY PROCESSING RESULTS
+   TIME CONVERSION
 ========================================================= */
 
+function convertTimeForDate(time) {
 
-function displayProcessingResults() {
+  if (!time) {
+    return "00:00:00";
+  }
 
+  let cleaned =
+    time.trim()
+      .toUpperCase();
+
+  const ampmMatch =
+    cleaned.match(
+      /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/
+    );
+
+  if (!ampmMatch) {
+
+    return cleaned;
+
+  }
+
+  let hour =
+    Number(ampmMatch[1]);
+
+  const minute =
+    ampmMatch[2];
+
+  const second =
+    ampmMatch[3] || "00";
+
+  const ampm =
+    ampmMatch[4];
+
+
+  if (ampm === "PM" && hour < 12) {
+    hour += 12;
+  }
+
+  if (ampm === "AM" && hour === 12) {
+    hour = 0;
+  }
+
+
+  return `${String(hour).padStart(2, "0")}:${minute}:${second}`;
+
+}
+
+
+/* =========================================================
+   DISPLAY RESULTS
+========================================================= */
+
+function displayResults() {
 
   results.innerHTML =
     "<h2>Processing Results</h2>";
@@ -2760,16 +2451,12 @@ function displayProcessingResults() {
     i++
   ) {
 
-
     const doc =
       processedDocuments[i];
 
 
     const item =
-      document.createElement(
-        "div"
-      );
-
+      document.createElement("div");
 
     item.className =
       "result-item";
@@ -2782,9 +2469,7 @@ function displayProcessingResults() {
     if (
       doc.mapping.status
         .toLowerCase()
-        .includes(
-          "provisional"
-        )
+        .includes("provisional")
     ) {
 
       statusClass =
@@ -2796,86 +2481,54 @@ function displayProcessingResults() {
     item.innerHTML = `
 
       <div class="result-name">
-
-        ${i + 1}.
-        ${escapeHtml(
-          doc.originalName
-        )}
-
+        ${escapeHtml(doc.originalName)}
       </div>
-
 
       <div class="result-status">
 
-        <strong>
-          Identified as:
-        </strong>
+        <strong>Identified as:</strong>
 
         ${
           doc.identifiedAs
-            ? escapeHtml(
-                doc.identifiedAs
-              )
+            ? escapeHtml(doc.identifiedAs)
             : '<span class="warning">⚠ Document type not identified</span>'
         }
 
-
         <br><br>
 
-
-        <strong>
-          Filing date:
-        </strong>
+        <strong>Filing date:</strong>
 
         ${
           doc.filingInfo
-            ? escapeHtml(
-                doc.filingInfo.date
-              )
+            ? escapeHtml(doc.filingInfo.date)
             : '<span class="warning">⚠ Date not found</span>'
         }
 
-
         <br>
 
-
-        <strong>
-          Filing time:
-        </strong>
+        <strong>Filing time:</strong>
 
         ${
           doc.filingInfo
             ? escapeHtml(
-                doc.filingInfo.time ||
-                "Not found"
+                doc.filingInfo.time || "Not found"
               )
             : "Not found"
         }
 
-
         <br><br>
 
-
-        <strong>
-          CaseLines section:
-        </strong>
-
+        <strong>CaseLines section:</strong>
 
         <br>
-
 
         ${escapeHtml(
           doc.mapping.section
         )}
 
-
         <br><br>
 
-
-        <strong>
-          Status:
-        </strong>
-
+        <strong>Status:</strong>
 
         <span class="${statusClass}">
           ${escapeHtml(
@@ -2883,17 +2536,13 @@ function displayProcessingResults() {
           )}
         </span>
 
-
         ${
           doc.error
             ? `
               <br><br>
-
               <span class="warning">
                 ⚠ Processing warning:
-                ${escapeHtml(
-                  doc.error
-                )}
+                ${escapeHtml(doc.error)}
               </span>
             `
             : ""
@@ -2904,202 +2553,92 @@ function displayProcessingResults() {
     `;
 
 
-    results.appendChild(
-      item
-    );
+    results.appendChild(item);
+
+  }
+
+
+  const missingDates =
+    processedDocuments.filter(
+      doc => !doc.filingInfo
+    ).length;
+
+
+  fileCount.textContent =
+    `${processedDocuments.length} document(s) processed and sorted oldest to newest.`;
+
+
+  if (
+    missingDates > 0
+  ) {
+
+    fileCount.textContent +=
+      ` ⚠ ${missingDates} document(s) require date review.`;
 
   }
 
 }
 
 
-
 /* =========================================================
-   CREATE VERIFICATION LIST
+   REVIEW PROVISIONAL ALLOCATIONS
 ========================================================= */
 
+function displayReviewSection() {
 
-function createVerificationList() {
-
-
-  verificationList.innerHTML =
-    "";
+  reviewList.innerHTML = "";
 
 
-  verification.style.display =
-    "block";
-
-
-  let provisionalCount =
-    0;
-
-
-  let missingDateCount =
-    0;
-
-
-  processedDocuments.forEach(
-    function (doc, index) {
-
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-
-      item.className =
-        "verification-item";
-
-
-      const isProvisional =
+  const provisionalDocuments =
+    processedDocuments.filter(
+      doc =>
         doc.mapping.status
           .toLowerCase()
-          .includes(
-            "provisional"
-          );
+          .includes("provisional")
+    );
 
 
-      if (
-        isProvisional
-      ) {
+  provisionalDocuments.forEach(
+    function (doc) {
 
-        provisionalCount++;
+      const reviewItem =
+        document.createElement("div");
 
-      }
-
-
-      if (
-        !doc.filingInfo
-      ) {
-
-        missingDateCount++;
-
-      }
+      reviewItem.className =
+        "review-item";
 
 
-      const name =
-        document.createElement(
-          "div"
-        );
+      const label =
+        document.createElement("div");
 
-
-      name.className =
-        "verification-name";
-
-
-      name.textContent =
-        `${index + 1}. ${doc.originalName}`;
-
-
-      item.appendChild(
-        name
-      );
-
-
-      const info =
-        document.createElement(
-          "div"
-        );
-
-
-      info.className =
-        "verification-info";
-
-
-      info.innerHTML = `
+      label.innerHTML = `
 
         <strong>
-          Court Online type:
+          ${escapeHtml(doc.originalName)}
         </strong>
 
-        ${
-          doc.identifiedAs
-            ? escapeHtml(
-                doc.identifiedAs
-              )
-            : '<span class="warning">Not identified</span>'
-        }
+        <br><br>
 
-
-        <br>
-
-
-        <strong>
-          Filing:
-        </strong>
-
-        ${
-          doc.filingInfo
-            ? escapeHtml(
-                doc.filingInfo.date
-              ) +
-              " " +
-              escapeHtml(
-                doc.filingInfo.time ||
-                ""
-              )
-            : '<span class="warning">⚠ Date not found</span>'
-        }
+        <span class="review-provisional">
+          Current allocation:
+          ${escapeHtml(doc.mapping.section)}
+        </span>
 
       `;
 
 
-      item.appendChild(
-        info
-      );
-
-
-      const label =
-        document.createElement(
-          "label"
-        );
-
-
-      label.className =
-        "verification-label";
-
-
-      label.textContent =
-        "CaseLines section:";
-
-
-      item.appendChild(
-        label
-      );
-
-
       const select =
-        document.createElement(
-          "select"
-        );
+        document.createElement("select");
 
-
-      select.className =
-        "section-select";
-
-
-      select.dataset.index =
-        index;
-
-
-      /*
-        Add every CaseLines section.
-      */
 
       caseLinesSections.forEach(
         function (section) {
 
-
           const option =
-            document.createElement(
-              "option"
-            );
-
+            document.createElement("option");
 
           option.value =
             section;
-
 
           option.textContent =
             section;
@@ -3116,9 +2655,7 @@ function createVerificationList() {
           }
 
 
-          select.appendChild(
-            option
-          );
+          select.appendChild(option);
 
         }
       );
@@ -3128,850 +2665,966 @@ function createVerificationList() {
         "change",
         function () {
 
+          doc.mapping.section =
+            select.value;
 
-          const selectedSection =
-            this.value;
+          doc.mapping.status =
+            "Confirmed after manual review";
 
-
-          processedDocuments[
-            index
-          ].mapping.section =
-            selectedSection;
-
-
-          /*
-            If the user manually changes
-            the allocation, the document
-            is considered manually verified.
-          */
-
-          if (
-            selectedSection !==
-            doc.originalMapping
-          ) {
-
-            processedDocuments[
-              index
-            ].mapping.status =
-              "Manually Verified";
-
-          }
-
-
-          updateVerificationSummary();
+          doc.manuallyChanged =
+            true;
 
         }
       );
 
 
-      item.appendChild(
-        select
-      );
+      reviewItem.appendChild(label);
 
+      reviewItem.appendChild(select);
 
-      if (
-        isProvisional
-      ) {
-
-        const note =
-          document.createElement(
-            "div"
-          );
-
-
-        note.className =
-          "manual-change";
-
-
-        note.textContent =
-          "⚠ Provisional allocation — please review.";
-
-
-        item.appendChild(
-          note
-        );
-
-      }
-
-
-      if (
-        !doc.filingInfo
-      ) {
-
-        const dateWarning =
-          document.createElement(
-            "div"
-          );
-
-
-        dateWarning.className =
-          "date-warning";
-
-
-        dateWarning.textContent =
-          "⚠ Filing date/time could not be extracted. This document will be placed at the end of the chronological sequence.";
-
-        item.appendChild(
-          dateWarning
-        );
-
-      }
-
-
-      verificationList.appendChild(
-        item
-      );
+      reviewList.appendChild(reviewItem);
 
     }
   );
 
 
-  updateVerificationSummary();
+  reviewSection.classList.remove(
+    "hidden"
+  );
+
+
+  reviewSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 
 }
 
 
-
 /* =========================================================
-   VERIFICATION SUMMARY
+   CONFIRM REVIEW
 ========================================================= */
 
+confirmReviewButton.addEventListener(
+  "click",
+  function () {
 
-function updateVerificationSummary() {
+    const provisionalDocuments =
+      processedDocuments.filter(
+        doc =>
+          doc.mapping.status
+            .toLowerCase()
+            .includes("provisional")
+      );
 
 
-  let provisionalCount =
-    0;
+    /*
+      Any provisional documents still remaining
+      are considered reviewed and accepted at
+      their current allocation.
+    */
+
+    provisionalDocuments.forEach(
+      function (doc) {
+
+        doc.mapping.status =
+          "Confirmed after manual review";
+
+      }
+    );
 
 
-  let missingDateCount =
-    0;
+    reviewSection.classList.add(
+      "hidden"
+    );
+
+
+    displayResults();
+
+
+    prepareBundle();
+
+  }
+);
+
+
+/* =========================================================
+   PREPARE BUNDLE
+========================================================= */
+
+function prepareBundle() {
+
+  sortDocuments();
+
+
+  const grouped =
+    {};
 
 
   processedDocuments.forEach(
     function (doc) {
 
+      const section =
+        doc.mapping.section;
+
 
       if (
-        doc.mapping.status
-          .toLowerCase()
-          .includes(
-            "provisional"
-          )
+        !grouped[section]
       ) {
 
-        provisionalCount++;
+        grouped[section] =
+          [];
 
       }
 
 
-      if (
-        !doc.filingInfo
-      ) {
-
-        missingDateCount++;
-
-      }
+      grouped[section].push(
+        doc
+      );
 
     }
   );
 
 
-  if (
-    provisionalCount === 0 &&
-    missingDateCount === 0
-  ) {
+  /*
+    Sort every CaseLines folder chronologically.
+  */
 
-    verificationSummary.innerHTML = `
+  Object.keys(grouped).forEach(
+    function (section) {
 
-      <strong>
-        ✓ All documents are ready for bundling.
-      </strong>
+      grouped[section].sort(
+        compareDocuments
+      );
 
-      <br>
-
-      No provisional allocations remain
-      and all filing dates were found.
-
-    `;
-
-  } else {
+    }
+  );
 
 
-    verificationSummary.innerHTML = `
-
-      <strong>
-        Verification Summary
-      </strong>
-
-      <br><br>
-
-      ${
-        provisionalCount
-      }
-      provisional allocation(s) remaining.
+  displayBundlePreview(
+    grouped
+  );
 
 
-      <br>
+  bundleSection.classList.remove(
+    "hidden"
+  );
 
 
-      ${
-        missingDateCount
-      }
-      document(s) without an extracted filing date.
+  bundleReady =
+    true;
 
 
-      <br><br>
-
-      You may still create the bundle.
-      Documents without dates will be placed
-      at the end of their relevant section.
-
-    `;
-
-  }
+  bundleSection.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 
 }
 
 
-
 /* =========================================================
-   CREATE CASELINES BUNDLE
+   DOCUMENT COMPARATOR
 ========================================================= */
 
+function compareDocuments(a, b) {
 
-bundleButton.addEventListener(
+  if (
+    !a.filingInfo &&
+    !b.filingInfo
+  ) {
+
+    return a.originalName.localeCompare(
+      b.originalName
+    );
+
+  }
+
+  if (!a.filingInfo) {
+    return 1;
+  }
+
+  if (!b.filingInfo) {
+    return -1;
+  }
+
+
+  const dateA =
+    new Date(
+      `${a.filingInfo.date}T${
+        convertTimeForDate(
+          a.filingInfo.time
+        )
+      }`
+    );
+
+  const dateB =
+    new Date(
+      `${b.filingInfo.date}T${
+        convertTimeForDate(
+          b.filingInfo.time
+        )
+      }`
+    );
+
+
+  const difference =
+    dateA - dateB;
+
+
+  if (
+    difference !== 0
+  ) {
+
+    return difference;
+
+  }
+
+
+  return a.originalName.localeCompare(
+    b.originalName
+  );
+
+}
+
+
+/* =========================================================
+   BUNDLE PREVIEW
+========================================================= */
+
+function displayBundlePreview(grouped) {
+
+  bundlePreview.innerHTML = "";
+
+
+  const sections =
+    Object.keys(grouped).sort(
+      function (a, b) {
+
+        const numA =
+          parseInt(a.split(" ")[0], 10);
+
+        const numB =
+          parseInt(b.split(" ")[0], 10);
+
+        return numA - numB;
+
+      }
+    );
+
+
+  let total =
+    0;
+
+
+  sections.forEach(
+    function (section) {
+
+      const folder =
+        document.createElement("div");
+
+      folder.className =
+        "folder-preview";
+
+
+      folder.innerHTML = `
+
+        <strong>
+          📁 ${escapeHtml(section)}
+        </strong>
+
+        —
+        ${grouped[section].length}
+        document(s)
+
+      `;
+
+
+      bundlePreview.appendChild(
+        folder
+      );
+
+
+      total +=
+        grouped[section].length;
+
+    }
+  );
+
+
+  const totalElement =
+    document.createElement("p");
+
+  totalElement.innerHTML = `
+
+    <strong>
+      Total documents: ${total}
+    </strong>
+
+    <br>
+
+    Only CaseLines sections containing documents
+    will be included in the ZIP.
+
+  `;
+
+
+  bundlePreview.appendChild(
+    totalElement
+  );
+
+}
+
+
+/* =========================================================
+   GENERATE ZIP
+========================================================= */
+
+downloadBundleButton.addEventListener(
   "click",
   async function () {
 
-
-    if (
-      processedDocuments.length === 0
-    ) {
+    if (!bundleReady) {
 
       return;
 
     }
 
 
-    bundleButton.disabled =
+    if (!acknowledgementCheckbox.checked) {
+
+      alert(
+        "Please acknowledge the Beta disclaimer before downloading the bundle."
+      );
+
+      return;
+
+    }
+
+
+    downloadBundleButton.disabled =
       true;
 
-
-    bundleButton.textContent =
-      "Creating Bundle...";
-
-
-    bundleArea.style.display =
-      "none";
+    downloadBundleButton.textContent =
+      "Generating ZIP...";
 
 
     try {
-
-
-      /*
-        Re-sort documents before bundling.
-
-        This is important because the user may
-        have changed allocations but not dates.
-
-        Chronological order remains based on the
-        original Court Online filing date/time.
-      */
-
-      processedDocuments.sort(
-        function (a, b) {
-
-
-          const dateA =
-            getDateTimeValue(
-              a.filingInfo
-            );
-
-
-          const dateB =
-            getDateTimeValue(
-              b.filingInfo
-            );
-
-
-          return (
-            dateA - dateB
-          );
-
-        }
-      );
-
-
-      /*
-        Create JSZip object.
-      */
 
       const zip =
         new JSZip();
 
 
       /*
-        Track how many documents
-        go into each section.
+        README
       */
 
-      const sectionCounters =
+      const readme =
+        createReadme();
+
+
+      zip.file(
+        "README - CaseLines Bundler Beta 1.txt",
+        readme
+      );
+
+
+      /*
+        Group documents.
+      */
+
+      const grouped =
         {};
 
 
+      processedDocuments.forEach(
+        function (doc) {
+
+          const section =
+            doc.mapping.section;
+
+
+          if (
+            !grouped[section]
+          ) {
+
+            grouped[section] =
+              [];
+
+          }
+
+
+          grouped[section].push(
+            doc
+          );
+
+        }
+      );
+
+
       /*
-        Track folders created.
+        Sort folders numerically.
       */
 
-      const folders =
-        new Set();
+      const sections =
+        Object.keys(grouped).sort(
+          function (a, b) {
+
+            return (
+              parseInt(a.split(" ")[0], 10) -
+              parseInt(b.split(" ")[0], 10)
+            );
+
+          }
+        );
 
 
       /*
-        Add every document.
+        Create only folders containing documents.
       */
 
       for (
-        let i = 0;
-        i < processedDocuments.length;
-        i++
+        const section of sections
       ) {
 
-
-        const doc =
-          processedDocuments[i];
-
-
-        const section =
-          doc.mapping.section;
+        const folder =
+          zip.folder(section);
 
 
-        /*
-          Create a folder only when
-          a document actually exists.
-        */
+        grouped[section].sort(
+          compareDocuments
+        );
 
-        if (
-          !folders.has(section)
+
+        for (
+          let i = 0;
+          i < grouped[section].length;
+          i++
         ) {
 
-          zip.folder(
-            section
-          );
+          const doc =
+            grouped[section][i];
 
-          folders.add(
-            section
-          );
 
-          sectionCounters[
-            section
-          ] = 0;
+          const filename =
+            createOutputFilename(
+              doc,
+              i + 1
+            );
+
+
+          const buffer =
+            await doc.file.arrayBuffer();
+
+
+          folder.file(
+            filename,
+            buffer
+          );
 
         }
-
-
-        sectionCounters[
-          section
-        ]++;
-
-
-        const sequence =
-          String(
-            sectionCounters[
-              section
-            ]
-          ).padStart(
-            3,
-            "0"
-          );
-
-
-        /*
-          Determine a useful document name.
-
-          The CaseLines section number is NOT
-          repeated in the document filename.
-
-          Example:
-
-          001 - Notice of Motion with Founding Affidavit
-              001 - Notice of Motion.pdf
-              002 - Founding Affidavit.pdf
-              003 - Annexure 01.pdf
-        */
-
-
-        let baseName =
-          doc.identifiedAs ||
-          "Document";
-
-
-        /*
-          Clean characters that are
-          unsuitable for filenames.
-        */
-
-        baseName =
-          cleanFileName(
-            baseName
-          );
-
-
-        /*
-          Preserve PDF extension.
-        */
-
-        const newFileName =
-          `${sequence} - ${baseName}.pdf`;
-
-
-        /*
-          Add original PDF bytes.
-        */
-
-        const arrayBuffer =
-          await doc.file.arrayBuffer();
-
-
-        zip
-          .folder(section)
-          .file(
-            newFileName,
-            arrayBuffer
-          );
 
       }
 
 
-      /*
-        Create a small README explaining
-        the bundle.
-      */
+      downloadBundleButton.textContent =
+        "Creating ZIP file...";
 
-      const readmeText =
-        createBundleReadme(
-          processedDocuments,
-          sectionCounters
-        );
-
-
-      zip.file(
-        "README - CaseLines Bundler.txt",
-        readmeText
-      );
-
-
-      /*
-        Generate ZIP.
-      */
 
       const blob =
         await zip.generateAsync({
-
-          type:
-            "blob",
-
-          compression:
-            "DEFLATE",
-
+          type: "blob",
+          compression: "DEFLATE",
           compressionOptions: {
-
-            level:
-              6
-
+            level: 6
           }
-
         });
 
 
-      /*
-        Create download URL.
-      */
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
+      const dateStamp =
+        new Date()
+          .toISOString()
+          .slice(0, 10);
 
 
-      downloadButton.href =
-        url;
+      const filename =
+        `CaseLines_Bundle_Beta1_${dateStamp}.zip`;
 
 
-      downloadButton.download =
-        "CaseLines_Bundle.zip";
-
-
-      /*
-        Bundle statistics.
-      */
-
-      const folderCount =
-        folders.size;
-
-
-      const documentCount =
-        processedDocuments.length;
-
-
-      const missingDates =
-        processedDocuments.filter(
-          doc =>
-            !doc.filingInfo
-        ).length;
-
-
-      bundleMessage.innerHTML = `
-
-        <strong>
-          ✓ Bundle successfully created.
-        </strong>
-
-        <br><br>
-
-        ${
-          documentCount
-        }
-        document(s) included.
-
-        <br>
-
-        ${
-          folderCount
-        }
-        CaseLines section folder(s) created.
-
-        <br>
-
-        Documents have been ordered
-        chronologically within their
-        CaseLines sections.
-
-        ${
-          missingDates > 0
-            ? `
-              <br><br>
-
-              <span class="warning">
-                ⚠ ${missingDates}
-                document(s) did not have
-                an extracted filing date.
-                These were placed at the end
-                of their relevant section.
-              </span>
-            `
-            : ""
-        }
-
-        <br><br>
-
-        The original PDFs are preserved;
-        only their filenames have been changed
-        inside the bundle.
-
-      `;
-
-
-      bundleArea.style.display =
-        "block";
-
-
-      /*
-        Update bundle counter.
-      */
-
-      bundlesPrepared++;
-
-
-      localStorage.setItem(
-        "caseLinesBundlesPrepared",
-        bundlesPrepared
+      downloadBlob(
+        blob,
+        filename
       );
 
 
-      counterNumber.textContent =
-        bundlesPrepared;
+      bundleCount++;
+
+      localStorage.setItem(
+        "caseLinesBundleCount",
+        bundleCount
+      );
 
 
-      bundleButton.textContent =
-        "Create CaseLines Bundle";
+      document.querySelector(
+        ".counter-number"
+      ).textContent =
+        bundleCount;
 
 
-      bundleButton.disabled =
-        false;
+      downloadBundleButton.textContent =
+        "Bundle Downloaded";
+
+      alert(
+        "Your CaseLines ZIP bundle has been generated. Please make sure you save the downloaded ZIP file before closing this page."
+      );
 
 
     } catch (error) {
 
-
       console.error(
-        "Bundle creation error:",
+        "ZIP generation error:",
         error
       );
 
 
       alert(
-        "There was a problem creating the bundle.\n\n" +
-        error.message
+        "There was an error generating the ZIP file. Please try again."
       );
 
 
-      bundleButton.textContent =
-        "Create CaseLines Bundle";
-
-
-      bundleButton.disabled =
-        false;
+      downloadBundleButton.textContent =
+        "Download CaseLines Bundle";
 
     }
+
+
+    downloadBundleButton.disabled =
+      false;
 
   }
 );
 
 
-
 /* =========================================================
-   CLEAN FILENAMES
+   OUTPUT FILENAME
 ========================================================= */
 
-
-function cleanFileName(
-  value
+function createOutputFilename(
+  doc,
+  sequence
 ) {
 
-
-  let name =
-    String(
-      value ||
-      "Document"
-    );
+  const sequenceNumber =
+    String(sequence)
+      .padStart(3, "0");
 
 
-  /*
-    Remove characters that can cause
-    problems inside ZIP filenames.
-  */
+  const sectionNumber =
+    doc.mapping.section
+      .split(" ")[0];
 
-  name =
-    name.replace(
-      /[<>:"/\\|?*]/g,
-      ""
-    );
+
+  let documentType =
+    doc.identifiedAs ||
+    "Document";
 
 
   /*
-    Replace multiple spaces.
+    Remove characters that are unsuitable
+    for Windows filenames.
   */
 
-  name =
-    name.replace(
-      /\s+/g,
-      " "
+  documentType =
+    sanitiseFilename(
+      documentType
     );
 
 
-  /*
-    Remove trailing dots/spaces.
-  */
+  let date =
+    "DATE-REVIEW-REQUIRED";
 
-  name =
-    name.replace(
-      /[. ]+$/,
-      ""
-    );
+
+  let time =
+    "";
+
+
+  if (
+    doc.filingInfo
+  ) {
+
+    date =
+      doc.filingInfo.date;
+
+    time =
+      convertTimeForFilename(
+        doc.filingInfo.time
+      );
+
+  }
 
 
   return (
-    name.trim() ||
-    "Document"
+    `${sequenceNumber} - ` +
+    `${sectionNumber} - ` +
+    `${documentType} - ` +
+    `${date}` +
+    (time ? ` ${time}` : "") +
+    `.pdf`
   );
 
 }
 
 
-
 /* =========================================================
-   CREATE README
+   TIME FOR FILENAME
 ========================================================= */
 
-
-function createBundleReadme(
-  documents,
-  sectionCounters
+function convertTimeForFilename(
+  time
 ) {
 
-
-  let text =
-    "";
-
-
-  text +=
-    "CaseLines Bundle\n";
-
-  text +=
-    "============================\n\n";
+  if (!time) {
+    return "";
+  }
 
 
-  text +=
-    "Prepared by CaseLines Bundler\n\n";
-
-
-  text +=
-    "Documents: " +
-    documents.length +
-    "\n";
-
-
-  text +=
-    "CaseLines sections: " +
-    Object.keys(
-      sectionCounters
-    ).length +
-    "\n\n";
-
-
-  text +=
-    "Document order:\n";
-
-  text +=
-    "Documents were sorted according to the Court Online filing date/time, oldest to newest.\n\n";
-
-
-  text +=
-    "Verification:\n";
-
-  text +=
-    "CaseLines allocations marked provisional were available for manual verification before bundling.\n\n";
-
-
-  text +=
-    "Documents for which no filing date could be extracted were placed at the end of their relevant section.\n\n";
-
-
-  text +=
-    "Original PDF content has not been altered.\n";
-
-
-  return text;
+  return convertTimeForDate(
+    time
+  ).replace(
+    /:/g,
+    "-"
+  );
 
 }
 
 
-
 /* =========================================================
-   RESET
+   FILENAME SANITISATION
 ========================================================= */
 
+function sanitiseFilename(
+  value
+) {
 
-resetButton.addEventListener(
-  "click",
-  function () {
+  return String(value || "Document")
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
-
-    /*
-      Clear current files.
-    */
-
-    fileUpload.value =
-      "";
+}
 
 
-    window.droppedFiles =
-      [];
+/* =========================================================
+   README
+========================================================= */
+
+function createReadme() {
+
+  const generated =
+    new Date()
+      .toLocaleString();
 
 
-    processedDocuments =
-      [];
+  return `
+
+CASELINES BUNDLER
+BETA 1
+
+Generated:
+${generated}
 
 
-    fileList.innerHTML =
-      "";
+============================================================
+BETA VERSION — FOR TESTING AND FEEDBACK
+============================================================
+
+CaseLines Bundler is currently provided as a Beta version
+for testing by selected users and for the purpose of obtaining
+feedback and identifying errors or improvements.
+
+The application is designed to assist users in organising
+Court Online documents into a CaseLines-ready structure.
+
+Because the application performs automated processing, errors
+may occur. These may include incorrect document-type
+identification, incorrect filing dates or times, incorrect
+CaseLines classifications, incorrect ordering, incorrect
+filenames or other errors.
+
+The application does not replace professional judgment or
+review.
+
+USERS ARE RESPONSIBLE FOR CHECKING AND VERIFYING THE OUTPUT
+BEFORE RELYING UPON IT, SUBMITTING IT TO A COURT, UPLOADING IT
+TO CASELINES, OR OTHERWISE USING IT FOR ANY LEGAL OR
+PROFESSIONAL PURPOSE.
 
 
-    results.innerHTML =
-      "";
+============================================================
+PRIVACY AND POPIA
+============================================================
+
+LOCAL PROCESSING OF DOCUMENTS
+
+CaseLines Bundler is designed to process uploaded PDF
+documents locally on the user's computer, within the user's
+web browser.
+
+The PDF documents selected by the user are not uploaded by
+CaseLines Bundler to a server operated by the application and
+are not intentionally transmitted to the developer for storage
+or processing.
+
+The application processes the documents in the user's browser
+in order to identify document types, extract filing dates and
+times, classify documents, rename documents and prepare the
+CaseLines bundle.
+
+The application does not intentionally retain the uploaded
+PDF documents after processing has been completed.
 
 
-    verificationList.innerHTML =
-      "";
+POPIA
+
+Because the application is designed so that the user's
+documents remain on the user's computer and are processed
+locally in the user's browser, the developer does not receive,
+collect or retain the personal information contained in those
+documents through the operation of the application.
+
+Accordingly, the application is designed so that the developer
+does not itself undertake the remote collection or storage of
+the personal information contained in the documents uploaded
+by the user.
+
+Users remain responsible for their own handling of personal
+information and confidential information, including ensuring
+that they are authorised to access, process and use the
+documents and that their use of the application complies with
+any applicable legal, professional, confidentiality, court or
+organisational requirements.
+
+IMPORTANT:
+
+This statement describes the intended technical operation of
+the application. It should not be interpreted as legal advice
+or as a determination that any particular use of the
+application is exempt from POPIA or any other applicable law.
 
 
-    verification.style.display =
-      "none";
+============================================================
+IMPORTANT — SAVE YOUR BUNDLE
+============================================================
+
+The application does not retain the PDF documents after
+processing.
+
+Once the CaseLines ZIP file has been generated, the original
+PDFs and the generated bundle are not stored by the application
+for later retrieval.
+
+YOU MUST SAVE THE GENERATED ZIP FILE TO YOUR COMPUTER BEFORE
+LEAVING THE PAGE OR CLOSING YOUR BROWSER.
+
+If you leave the page, close the browser, refresh the page,
+or otherwise lose the generated file, the application will not
+be able to retrieve or restore the bundle for you.
 
 
-    bundleArea.style.display =
-      "none";
+============================================================
+USER RESPONSIBILITY
+============================================================
+
+CaseLines Bundler is an assistance and document-organisation
+tool.
+
+The user remains responsible for:
+
+- verifying every document's Court Online document type;
+- verifying every filing date and filing time;
+- verifying the chronological order of documents;
+- reviewing all Provisional - Review Required classifications;
+- correcting classifications where necessary;
+- verifying filenames and CaseLines section allocations;
+- ensuring that all required documents have been included;
+- ensuring that no documents have been omitted;
+- ensuring that the resulting bundle complies with the
+  applicable CaseLines requirements; and
+- verifying the final ZIP file before uploading or using it.
+
+No output generated by CaseLines Bundler should be treated as
+automatically correct merely because the application has
+classified or processed it.
 
 
-    fileCount.textContent =
-      "";
+============================================================
+LEGAL DISCLAIMER
+============================================================
+
+CaseLines Bundler does not provide legal advice, legal
+opinions or advice regarding court procedure.
+
+The application does not determine what documents a user is
+legally required to file, what documents should be included
+in a court bundle, or what CaseLines section is legally
+appropriate in any particular matter.
+
+The classifications and mappings produced by the application
+are intended to assist the user and may be incorrect or
+incomplete.
+
+The user must exercise their own professional judgment and
+verify the output before using it for any legal, court or
+professional purpose.
+
+The developer makes no representation that the application
+will identify, classify, sort, rename or organise every
+document correctly.
+
+The Beta version may contain defects, errors, omissions or
+incomplete functionality.
 
 
-    processButton.disabled =
-      true;
+============================================================
+CONFIDENTIALITY
+============================================================
+
+Users should only upload documents that they are authorised
+to process using the application.
+
+Users remain responsible for complying with any duties of
+confidentiality, privilege, professional secrecy, court rules,
+contractual obligations and applicable legislation relating
+to the documents they process.
+
+Although the application is designed for local browser-based
+processing, users should ensure that they are using the
+application in an appropriate and secure environment.
 
 
-    processButton.textContent =
-      "Process Documents";
+============================================================
+BETA FEEDBACK
+============================================================
+
+This is Beta 1, and your feedback is important.
+
+If you encounter an incorrect classification, filing date,
+filing time, CaseLines allocation, filename, sorting result,
+folder structure or any other problem, please report it.
+
+Please include, where possible:
+
+- what you uploaded;
+- what the application did;
+- what you expected it to do; and
+- any relevant error message or screenshot.
+
+FEEDBACK EMAIL:
+
+ned@live.co.za
 
 
-    bundleButton.disabled =
-      false;
+============================================================
+BETA ACKNOWLEDGEMENT
+============================================================
+
+I understand that CaseLines Bundler is Beta software.
+
+I understand that its output may contain errors and that I am
+responsible for reviewing and verifying the generated results
+before using them for any legal, court or professional purpose.
+
+I understand that my documents are processed locally in my
+browser and are not retained by the application after
+processing.
+
+I understand that I must save my generated ZIP file because
+the application cannot retrieve it after the session ends.
 
 
-    bundleButton.textContent =
-      "Create CaseLines Bundle";
+============================================================
+END OF README
+============================================================
+
+  `.trim();
+
+}
 
 
-    window.scrollTo({
+/* =========================================================
+   DOWNLOAD BLOB
+========================================================= */
 
-      top: 0,
+function downloadBlob(
+  blob,
+  filename
+) {
 
-      behavior:
-        "smooth"
+  const url =
+    URL.createObjectURL(
+      blob
+    );
 
-    });
 
-  }
-);
+  const link =
+    document.createElement("a");
 
+
+  link.href =
+    url;
+
+  link.download =
+    filename;
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+
+  link.remove();
+
+
+  setTimeout(
+    function () {
+
+      URL.revokeObjectURL(
+        url
+      );
+
+    },
+    1000
+  );
+
+}
 
 
 /* =========================================================
    SAFE HTML OUTPUT
 ========================================================= */
 
+function escapeHtml(value) {
 
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-
+  return String(value || "")
     .replace(
       /&/g,
       "&amp;"
     )
-
     .replace(
       /</g,
       "&lt;"
     )
-
     .replace(
       />/g,
       "&gt;"
     )
-
     .replace(
       /"/g,
       "&quot;"
     )
-
     .replace(
       /'/g,
       "&#039;"
@@ -3979,10 +3632,7 @@ function escapeHtml(
 
 }
 
-
 </script>
 
-
 </body>
-
 </html>
