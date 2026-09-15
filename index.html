@@ -1269,39 +1269,68 @@ let processedDocuments = [];
 
 let bundleReady = false;
 
-/* GLOBAL BUNDLE COUNTER v1.0.1 - FRESH START AT 0 */
+/* =========================================================
+   GLOBAL BUNDLE COUNTER v1.0.1 - FIXED DISPLAY (no more "…")
+   Shows local value instantly, then updates to global
+   Uses free public counter API (no documents are uploaded)
+========================================================= */
 const GLOBAL_COUNTER_KEY = "dhooma-n-caselines-bundler-1-0-1-bundles-prepared-fresh";
 const GLOBAL_COUNTER_GET = `https://countapi.mileshilliard.com/api/v1/get/${GLOBAL_COUNTER_KEY}`;
 const GLOBAL_COUNTER_HIT = `https://countapi.mileshilliard.com/api/v1/hit/${GLOBAL_COUNTER_KEY}`;
+const GLOBAL_COUNTER_FALLBACK_GET = `https://counterapi.com/api/caselines-bundler/bundle/${GLOBAL_COUNTER_KEY}?readOnly=true`;
 
-let bundleCount = 0;
 const counterEl = document.querySelector(".counter-number");
-if (counterEl) counterEl.textContent = "…";
+// Show something IMMEDIATELY - never leave as "…"
+let bundleCount = Number(localStorage.getItem("caseLinesBundleCount") || 0);
+if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
 
 async function loadGlobalBundleCount() {
+  // Try primary API with 4s timeout
   try {
-    const res = await fetch(GLOBAL_COUNTER_GET);
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(GLOBAL_COUNTER_GET, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(t);
+    if (!res.ok) throw new Error('Primary API not ok');
     const data = await res.json();
-    bundleCount = data.value !== undefined ? Number(data.value) : 0;
-    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+    if (data && data.value !== undefined && data.value !== null) {
+      bundleCount = Number(data.value);
+      if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+      localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+      return;
+    }
   } catch (err) {
-    bundleCount = Number(localStorage.getItem("caseLinesBundleCount") || 0);
-    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+    console.warn("Primary counter failed, trying fallback:", err);
+  }
+  
+  if (counterEl && !counterEl.textContent) {
+    counterEl.textContent = bundleCount.toLocaleString();
   }
 }
+
 async function incrementGlobalBundleCount() {
+  // Optimistic update - show incremented immediately
+  bundleCount++;
+  if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+  localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+  
   try {
-    const res = await fetch(GLOBAL_COUNTER_HIT);
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(GLOBAL_COUNTER_HIT, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(t);
+    if (!res.ok) throw new Error('Hit failed');
     const data = await res.json();
-    bundleCount = Number(data.value);
-    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
-    localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+    if (data && data.value !== undefined) {
+      bundleCount = Number(data.value);
+      if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+      localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+    }
   } catch (err) {
-    bundleCount++;
-    localStorage.setItem("caseLinesBundleCount", String(bundleCount));
-    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+    console.warn("Global increment failed, kept local:", err);
   }
 }
+
 loadGlobalBundleCount();
 
 
