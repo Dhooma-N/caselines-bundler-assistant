@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>CaseLines Bundler — Beta 1</title>
+  <title>CaseLines Bundler — Beta 1.0.1</title>
 
   <meta
   name="copyright"
@@ -444,7 +444,7 @@
 
   <div class="beta-banner">
 
-    <h2>⚠ BETA 1 — FOR TESTING AND FEEDBACK</h2>
+    <h2>⚠ BETA 1.0.1 — FOR TESTING AND FEEDBACK</h2>
 
     <p>
       CaseLines Bundler is currently provided as a
@@ -649,7 +649,7 @@
 
   <div class="feedback-section">
 
-    <h2>Beta 1 — We'd Appreciate Your Feedback</h2>
+    <h2>Beta 1.0.1 — We'd Appreciate Your Feedback</h2>
 
     <p>
       If you encounter an incorrect classification, filing date,
@@ -941,7 +941,7 @@
     <h2>Beta Feedback</h2>
 
     <p>
-      This is <strong>Beta 1</strong>, and your feedback is
+      This is <strong>Beta 1.0.1</strong>, and your feedback is
       important.
     </p>
 
@@ -1269,16 +1269,40 @@ let processedDocuments = [];
 
 let bundleReady = false;
 
-let bundleCount =
-  Number(
-    localStorage.getItem("caseLinesBundleCount") || 0
-  );
+/* GLOBAL BUNDLE COUNTER v1.0.1 - FRESH START AT 0 */
+const GLOBAL_COUNTER_KEY = "dhooma-n-caselines-bundler-1-0-1-bundles-prepared-fresh";
+const GLOBAL_COUNTER_GET = `https://countapi.mileshilliard.com/api/v1/get/${GLOBAL_COUNTER_KEY}`;
+const GLOBAL_COUNTER_HIT = `https://countapi.mileshilliard.com/api/v1/hit/${GLOBAL_COUNTER_KEY}`;
 
+let bundleCount = 0;
+const counterEl = document.querySelector(".counter-number");
+if (counterEl) counterEl.textContent = "…";
 
-document.querySelector(
-  ".counter-number"
-).textContent =
-  bundleCount;
+async function loadGlobalBundleCount() {
+  try {
+    const res = await fetch(GLOBAL_COUNTER_GET);
+    const data = await res.json();
+    bundleCount = data.value !== undefined ? Number(data.value) : 0;
+    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+  } catch (err) {
+    bundleCount = Number(localStorage.getItem("caseLinesBundleCount") || 0);
+    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+  }
+}
+async function incrementGlobalBundleCount() {
+  try {
+    const res = await fetch(GLOBAL_COUNTER_HIT);
+    const data = await res.json();
+    bundleCount = Number(data.value);
+    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+    localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+  } catch (err) {
+    bundleCount++;
+    localStorage.setItem("caseLinesBundleCount", String(bundleCount));
+    if (counterEl) counterEl.textContent = bundleCount.toLocaleString();
+  }
+}
+loadGlobalBundleCount();
 
 
 /* =========================================================
@@ -3232,7 +3256,7 @@ downloadBundleButton.addEventListener(
 
 
       zip.file(
-        "README - CaseLines Bundler Beta 1.txt",
+        "README - CaseLines Bundler Beta 1.0.1.txt",
         readme
       );
 
@@ -3365,18 +3389,8 @@ downloadBundleButton.addEventListener(
       );
 
 
-      bundleCount++;
-
-      localStorage.setItem(
-        "caseLinesBundleCount",
-        bundleCount
-      );
-
-
-      document.querySelector(
-        ".counter-number"
-      ).textContent =
-        bundleCount;
+      // Increment GLOBAL counter v1.0.1 (fresh at 0)
+      incrementGlobalBundleCount();
 
 
       downloadBundleButton.textContent =
@@ -3536,7 +3550,7 @@ function createReadme() {
   return `
 
 CASELINES BUNDLER
-BETA 1
+BETA 1.0.1
 
 Generated:
 ${generated}
@@ -3714,7 +3728,7 @@ application in an appropriate and secure environment.
 BETA FEEDBACK
 ============================================================
 
-This is Beta 1, and your feedback is important.
+This is Beta 1.0.1, and your feedback is important.
 
 If you encounter an incorrect classification, filing date,
 filing time, CaseLines allocation, filename, sorting result,
